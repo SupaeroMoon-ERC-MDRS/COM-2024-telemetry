@@ -1,0 +1,461 @@
+{
+    "unit_descriptions": [
+        {
+            "millimeters": {
+                "representations": [
+                    "mm"
+                ],
+                "is_base": false,
+                "dim": "length"
+            }
+        },
+        {
+            "meters": {
+                "representations": [
+                    "m"
+                ],
+                "is_base": true,
+                "dim": "length"
+            }
+        },
+        {
+            "kilometers": {
+                "representations": [
+                    "km"
+                ],
+                "is_base": false,
+                "dim": "length"
+            }
+        },
+        {
+            "milliseconds": {
+                "representations": [
+                    "ms"
+                ],
+                "is_base": false,
+                "dim": "time"
+            }
+        },
+        {
+            "seconds": {
+                "representations": [
+                    "s",
+                    "sec"
+                ],
+                "is_base": true,
+                "dim": "time"
+            }
+        },
+        {
+            "minutes": {
+                "representations": [
+                    "min"
+                ],
+                "is_base": false,
+                "dim": "time"
+            }
+        },
+        {
+            "hours": {
+                "representations": [
+                    "h"
+                ],
+                "is_base": false,
+                "dim": "time"
+            }
+        },
+        {
+            "g": {
+                "representations": [
+                    "g"
+                ],
+                "is_base": true,
+                "dim": "acceleration"
+            }
+        },
+        {
+            "kilogramms": {
+                "representations": [
+                    "kg"
+                ],
+                "is_base": true,
+                "dim": "mass"
+            }
+        },
+        {
+            "newtons": {
+                "representations": [
+                    "N"
+                ],
+                "is_base": true,
+                "dim": "force"
+            }
+        },
+        {
+            "kilonewtons": {
+                "representations": [
+                    "kN"
+                ],
+                "is_base": false,
+                "dim": "force"
+            }
+        },
+        {
+            "milliampere": {
+                "representations": [
+                    "mA"
+                ],
+                "is_base": false,
+                "dim": "current"
+            }
+        },
+        {
+            "ampere": {
+                "representations": [
+                    "A"
+                ],
+                "is_base": true,
+                "dim": "current"
+            }
+        },
+        {
+            "millivolts": {
+                "representations": [
+                    "mV"
+                ],
+                "is_base": false,
+                "dim": "voltage"
+            }
+        },
+        {
+            "volts": {
+                "representations": [
+                    "V"
+                ],
+                "is_base": true,
+                "dim": "voltage"
+            }
+        },
+        {
+            "kilovolts": {
+                "representations": [
+                    "kV"
+                ],
+                "is_base": false,
+                "dim": "voltage"
+            }
+        },
+        {
+            "milliwatts": {
+                "representations": [
+                    "mW"
+                ],
+                "is_base": false,
+                "dim": "power"
+            }
+        },
+        {
+            "watts": {
+                "representations": [
+                    "W"
+                ],
+                "is_base": true,
+                "dim": "power"
+            }
+        },
+        {
+            "kilowatts": {
+                "representations": [
+                    "kW"
+                ],
+                "is_base": false,
+                "dim": "power"
+            }
+        },
+        {
+            "celsius": {
+                "representations": [
+                    "°C"
+                ],
+                "is_base": true,
+                "dim": "temperature"
+            }
+        },
+        {
+            "joules": {
+                "representations": [
+                    "J"
+                ],
+                "is_base": true,
+                "dim": "energy"
+            }
+        },
+        {
+            "kilojoules": {
+                "representations": [
+                    "kJ"
+                ],
+                "is_base": false,
+                "dim": "energy"
+            }
+        },
+        {
+            "pascals": {
+                "representations": [
+                    "Pa"
+                ],
+                "is_base": true,
+                "dim": "pressure"
+            }
+        },
+        {
+            "bars": {
+                "representations": [
+                    "bar"
+                ],
+                "is_base": false,
+                "dim": "pressure"
+            }
+        },
+        {
+            "radians": {
+                "representations": [
+                    "rad"
+                ],
+                "is_base": true,
+                "dim": "angle"
+            }
+        },
+        {
+            "degrees": {
+                "representations": [
+                    "°",
+                    "deg"
+                ],
+                "is_base": false,
+                "dim": "angle"
+            }
+        },
+        {
+            "percent": {
+                "representations": [
+                    "%"
+                ],
+                "is_base": true,
+                "dim": "percentage"
+            }
+        },
+        {
+            "ppm": {
+                "representations": [
+                    "ppm"
+                ],
+                "is_base": false,
+                "dim": "percentage"
+            }
+        }
+    ],
+    "conversions": [
+        {
+            "from": "millimeters",
+            "to": "meters",
+            "multiplier": 0.001
+        },
+        {
+            "from": "kilometers",
+            "to": "meters",
+            "multiplier": 1000.0
+        },
+        {
+            "from": "milliseconds",
+            "to": "seconds",
+            "multiplier": 0.001
+        },
+        {
+            "from": "minutes",
+            "to": "seconds",
+            "multiplier": 60.0
+        },
+        {
+            "from": "hours",
+            "to": "seconds",
+            "multiplier": 3600.0
+        },
+        {
+            "from": "kilonewtons",
+            "to": "newtons",
+            "multiplier": 1000.0
+        },
+        {
+            "from": "milliampere",
+            "to": "ampere",
+            "multiplier": 0.001
+        },
+        {
+            "from": "millivolts",
+            "to": "volts",
+            "multiplier": 0.001
+        },
+        {
+            "from": "kilovolts",
+            "to": "volts",
+            "multiplier": 1000.0
+        },
+        {
+            "from": "milliwatts",
+            "to": "watts",
+            "multiplier": 0.001
+        },
+        {
+            "from": "kilowatts",
+            "to": "watts",
+            "multiplier": 1000.0
+        },
+        {
+            "from": "kilojoules",
+            "to": "joules",
+            "multiplier": 1000.0
+        },
+        {
+            "from": "bars",
+            "to": "pascals",
+            "multiplier": 100000.0
+        },
+        {
+            "from": "degrees",
+            "to": "radians",
+            "multiplier": 0.017453292519943295
+        },
+        {
+            "from": "ppm",
+            "to": "percent",
+            "multiplier": 10000.0
+        }
+    ],
+    "compositions": [
+        {
+            "to": "g",
+            "composition_options": [
+                {
+                    "amount": 9.80665,
+                    "composition": {
+                        "meters": 1,
+                        "seconds": -2
+                    }
+                }
+            ]
+        },
+        {
+            "to": "newtons",
+            "composition_options": [
+                {
+                    "amount": 1.0,
+                    "composition": {
+                        "kilogramms": 1,
+                        "meters": 1,
+                        "seconds": -2
+                    }
+                },
+                {
+                    "amount": 0.10197162129779283,
+                    "composition": {
+                        "kilogramms": 1,
+                        "g": 1
+                    }
+                },
+                {
+                    "amount": 1.0,
+                    "composition": {
+                        "pascals": 1,
+                        "meters": 2
+                    }
+                },
+                {
+                    "amount": 1.0,
+                    "composition": {
+                        "joules": 1,
+                        "meters": -1
+                    }
+                }
+            ]
+        },
+        {
+            "to": "watts",
+            "composition_options": [
+                {
+                    "amount": 1.0,
+                    "composition": {
+                        "joules": 1,
+                        "seconds": -1
+                    }
+                },
+                {
+                    "amount": 1.0,
+                    "composition": {
+                        "volts": 1,
+                        "ampere": 1
+                    }
+                }
+            ]
+        },
+        {
+            "to": "joules",
+            "composition_options": [
+                {
+                    "amount": 1.0,
+                    "composition": {
+                        "newtons": 1,
+                        "meters": 1
+                    }
+                },
+                {
+                    "amount": 1.0,
+                    "composition": {
+                        "watts": 1,
+                        "seconds": 1
+                    }
+                },
+                {
+                    "amount": 1.0,
+                    "composition": {
+                        "pascals": 1,
+                        "meters": 3
+                    }
+                }
+            ]
+        },
+        {
+            "to": "pascals",
+            "composition_options": [
+                {
+                    "amount": 1.0,
+                    "composition": {
+                        "newtons": 1,
+                        "meters": -2
+                    }
+                },
+                {
+                    "amount": 1.0,
+                    "composition": {
+                        "joules": 1,
+                        "meters": -3
+                    }
+                }
+            ]
+        },
+        {
+            "to": "volts",
+            "composition_options": [
+                {
+                    "amount": 1.0,
+                    "composition": {
+                        "kilogramms": 1,
+                        "meters": 2,
+                        "seconds": -3,
+                        "ampere": -1
+                    }
+                }
+            ]
+        }
+    ]
+}

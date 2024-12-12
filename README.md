@@ -1,13 +1,1 @@
-placeholder
-
-
-
-
-
-
-
-
-
-
-
-for now :)
+An example of a flutter GUI

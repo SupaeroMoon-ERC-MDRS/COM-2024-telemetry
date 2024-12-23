@@ -10,19 +10,15 @@ abstract class FileSystem{
 
   static String? _currentDirectory;
 
-  static String get customTimeSeriesGroupDir => "CustomTimeSeriesGroups/";
-  static String get customCharacteristicsGroupDir => "CustomCharacteristicsGroups/";
-  static String get channelDir => "Channels/";
+  static String get topDir => "/";
   static String get unitSystemDir => "UnitSystem/";
-  static String get statPresetDir => "StatViewPresets/";
-  static String get mainChartPresetDir => "MainChartPresets/";
 
   static Future<String?> get getCurrentDirectory async {
     if(_currentDirectory != null){
       return _currentDirectory;
     }
     String dir = Platform.resolvedExecutable;
-    if(Platform.isWindows){  // Linux nem buzi
+    if(Platform.isWindows){
       dir = dir.replaceAll(r'\', '/');
     }
     dir = dir.split('/').reversed.toList().sublist(1).reversed.toList().join('/');

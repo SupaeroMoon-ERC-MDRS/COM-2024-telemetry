@@ -2,6 +2,7 @@
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:flutter/material.dart';
 import 'package:supaeromoon_ground_station/data_misc/notifiers.dart';
 import 'package:supaeromoon_ground_station/data_storage/unit_system.dart';
 
@@ -41,15 +42,15 @@ class ValueTime<T extends TypedData>{
   };
 
   T value;
-  Uint32List time;
+  Uint64List time;
   late int _capacity;
   late int _size;
 
   int get size => _size;
   int get capacity => _capacity;
   
-  ValueTimePair get last => ValueTimePair((value as List).last, time.last);
-  ValueTimePair get first => ValueTimePair((value as List).first, time.first);
+  ValueTimePair? get lastOrNull => size != 0 ? ValueTimePair((value as List)[size - 1], time[size - 1]) : null;
+  ValueTimePair? get firstOrNull => size != 0 ? ValueTimePair((value as List)[0], time[0]) : null;
 
   bool get isEmpty => size == 0;
   bool get isNotEmpty => size != 0;
@@ -62,13 +63,13 @@ class ValueTime<T extends TypedData>{
   factory ValueTime(final int bufsize){
     return ValueTime._empty(
       value: _ctors[T]!(bufsize) as T,
-      time: Uint32List(bufsize)
+      time: Uint64List(bufsize)
     );
   }
 
   void reserve(int newCapacity){
     value = _realloc[T]!(newCapacity, _size, value) as T;
-    time = Uint32List(newCapacity)..setRange(0, _size, time);
+    time = Uint64List(newCapacity)..setRange(0, _size, time);
     _capacity = newCapacity;
   }
 
@@ -79,7 +80,7 @@ class ValueTime<T extends TypedData>{
 
   void pushback(final num v, final int t){
     if(_capacity <= _size){
-      reserve(_capacity + max(10000, min(1000, _size ~/ 2)));
+      reserve(_capacity + min(10000, max(1000, _size ~/ 2)));
     }
     (value as List)[_size] = v;
     time[_size] = t;
@@ -87,22 +88,23 @@ class ValueTime<T extends TypedData>{
   }
 
   void popfront(final int skip){
-    (value as List).setRange(0, _size - skip, time.skip(skip));
-    time.setRange(0, _size - skip, time.skip(skip));
+    (value as List).setRange(0, _size - skip, (value as List), skip);
+    time.setRange(0, _size - skip, time, skip);
     _size -= skip;
   }
   
 }
 
-class SignalContainer<T>{
-  final ValueTime vt;
+class SignalContainer<T extends TypedData>{
+  final UniqueKey key = UniqueKey();
+  final ValueTime<T> vt;
   final String dbcName;
   String displayName;
   CompoundUnit unit;
   BlankNotifier everyUpdateNotifier;
   BlankNotifier changeNotifier;
 
-  SignalContainer({
+  SignalContainer._({
     required this.vt,
     required this.dbcName,
     required this.displayName,
@@ -110,4 +112,15 @@ class SignalContainer<T>{
     required this.everyUpdateNotifier,
     required this.changeNotifier
   });
+
+  factory SignalContainer.create(final String dbcName, final String displayName){
+    return SignalContainer._(
+      vt: ValueTime<T>(0),
+      dbcName:dbcName,
+      displayName: displayName,
+      unit: CompoundUnit.scalar(), // TODO figure out from dbc
+      everyUpdateNotifier: BlankNotifier(null),
+      changeNotifier: BlankNotifier(null)
+    );
+  }
 }

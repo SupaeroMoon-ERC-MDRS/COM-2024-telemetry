@@ -1,10 +1,10 @@
 # Project-level configuration.
 cmake_minimum_required(VERSION 3.14)
-project(supaeromoon_telemetry LANGUAGES CXX)
+project(supaeromoon_ground_station LANGUAGES CXX)
 
 # The name of the executable created for the application. Change this to change
 # the on-disk name of your application.
-set(BINARY_NAME "supaeromoon_telemetry")
+set(BINARY_NAME "supaeromoon_ground_station")
 
 # Explicitly opt in to modern CMake behaviors to avoid warnings with recent
 # versions of CMake.

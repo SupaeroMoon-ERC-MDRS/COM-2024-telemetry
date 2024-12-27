@@ -4,12 +4,14 @@ abstract class Session{
   static int bufferMs = 1000 * 10;
   static int telemetryPort = 12121;
   static int remotePort = 12122;
+  static List<String> dbcPaths = [];
 
   static void save(){
     FileSystem.trySaveMapToLocalSync(FileSystem.topDir, "SESSION", {
       "bufferMs": bufferMs,
       "telemetryPort": telemetryPort,
       "remotePort": remotePort,
+      "dbcPaths": dbcPaths,
     });
   }
   
@@ -26,6 +28,10 @@ abstract class Session{
 
     if(data.containsKey("remotePort") && data["remotePort"] is int){
       remotePort = data["remotePort"];
+    }
+
+    if(data.containsKey("dbcPaths") && data["dbcPaths"] is List){
+      dbcPaths = data["dbcPaths"].cast<String>();
     }
   }
 }

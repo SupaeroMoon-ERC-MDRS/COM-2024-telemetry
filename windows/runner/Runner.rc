@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "supaeromoon_telemetry" "\0"
+            VALUE "FileDescription", "supaeromoon_ground_station" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "supaeromoon_telemetry" "\0"
+            VALUE "InternalName", "supaeromoon_ground_station" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2024 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "supaeromoon_telemetry.exe" "\0"
-            VALUE "ProductName", "supaeromoon_telemetry" "\0"
+            VALUE "OriginalFilename", "supaeromoon_ground_station.exe" "\0"
+            VALUE "ProductName", "supaeromoon_ground_station" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

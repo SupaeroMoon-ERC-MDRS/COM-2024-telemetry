@@ -81,7 +81,7 @@ abstract class Reader{
     return int.tryParse(buf.str.substring(start, pos));
   }
 
-  static double? readNextFloating(final CharBuf buf, final int eof){
+  static num? readNextFloating(final CharBuf buf, final int eof){
     int start = buf.tellg();
     int pos = start;
 
@@ -107,7 +107,7 @@ abstract class Reader{
     if(start != 0 && ["-", "+"].contains(buf.str[start - 1])){
       start--;
     }
-    return double.tryParse(buf.str.substring(start, pos));
+    return int.tryParse(buf.str.substring(start, pos)) ?? double.tryParse(buf.str.substring(start, pos));
   }
 
   static void seekUntil(final CharBuf buf, final int eof, final String pattern){
@@ -197,7 +197,7 @@ class Bitarray{
       res.buf[pos] = buf[pos - full];
     }
 
-    for(int i = buf.length - 1; i > 0; i--){
+    for(int i = buf.length - 1; i >= 0; i--){
       res.buf[i] = (res.buf[i] << part) & 0xFF;
       if(i - 1 > 0){
         res.buf[i] |= (res.buf[i - 1] & (255 - pow(2, part).toInt() - 1)) >> (8 - part);
@@ -260,8 +260,8 @@ class DBCSignal{
     int? length = Reader.readNextNumeric(buf, eof);
     int? endian = Reader.readNextNumeric(buf, eof);
     String? sign = Reader.readNextString(buf, eof);
-    double? scale = Reader.readNextFloating(buf, eof);
-    double? offset = Reader.readNextFloating(buf, eof);
+    num? scale = Reader.readNextFloating(buf, eof);
+    num? offset = Reader.readNextFloating(buf, eof);
 
     if(name != null && shift != null && length != null && endian != null && sign != null && scale != null && offset != null){
       if(shift > messageLen * 8 || shift + length > messageLen * 8){

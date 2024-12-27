@@ -1,6 +1,6 @@
 {
-    "name": "supaeromoon_telemetry",
-    "short_name": "supaeromoon_telemetry",
+    "name": "supaeromoon_ground_station",
+    "short_name": "supaeromoon_ground_station",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

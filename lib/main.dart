@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:supaeromoon_ground_station/data_source/database.dart';
-import 'package:supaeromoon_ground_station/data_source/selftest.dart';
+import 'package:supaeromoon_ground_station/lifecycle.dart';
 import 'package:supaeromoon_ground_station/ui/common.dart';
 import 'package:supaeromoon_ground_station/ui/screen/main_screen.dart';
 import 'package:supaeromoon_ground_station/ui/theme.dart';
 import 'package:window_manager/window_manager.dart';
 
-void main() {
-  DBCDatabase.parse("C:\\Users\\Lenovo\\Desktop\\COM-2024-DBC\\comms.dbc");
-  Selftest.start();
+void main() async {
+  await LifeCycle.preInit();
   runApp(const App());
 }
 
@@ -24,7 +22,7 @@ class _AppState extends State<App> with WindowListener {
   @override
   void initState() {
     ThemeManager.notifier.addListener(_update);
-    // other post gui startup init code
+    LifeCycle.postInit(this);
     setState(() {});
     super.initState();
   }
@@ -46,6 +44,6 @@ class _AppState extends State<App> with WindowListener {
 
   @override
   void onWindowClose() async {
-    // shutdown code
+    await LifeCycle.shutdown();
   }
 }

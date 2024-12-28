@@ -44,7 +44,7 @@ class _BooleanGenerator extends _GeneratorBase{
 
 
 abstract class Selftest{
-  static late Timer timer;
+  static late Timer _timer;
   static final Map<int, Map<String, _GeneratorBase>> _generators = { // TODO figure out automatically in setup()
     0x0F: {
       "l_top" : _BooleanGenerator()..setup(),
@@ -73,7 +73,7 @@ abstract class Selftest{
 
   static void start(){
     _setup();
-    timer = Timer.periodic(const Duration(milliseconds: 10), (timer) {
+    _timer = Timer.periodic(const Duration(milliseconds: 10), (timer) {
       final List<MapEntry<int, Map<String, num>>> data = [];
       for(final int id in _generators.keys){
         final Map<String, num> msg = _generators[id]!.map((sig, gen) => MapEntry(sig, gen.next()));
@@ -95,6 +95,6 @@ abstract class Selftest{
   }
 
   static void stop(){
-    timer.cancel();
+    _timer.cancel();
   }
 }

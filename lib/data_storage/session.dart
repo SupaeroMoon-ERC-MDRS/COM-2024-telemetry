@@ -1,7 +1,7 @@
 import 'package:supaeromoon_ground_station/io/file_system.dart';
 
 abstract class Session{
-  static int bufferMs = 1000 * 10;
+  static int bufferMs = 1000 * 60;
   static int telemetryPort = 12121;
   static int remotePort = 12122;
   static List<String> dbcPaths = [];

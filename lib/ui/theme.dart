@@ -10,8 +10,10 @@ class Style{
   final Color bgColor;
   final Color primaryColor;
   final Color secondaryColor;
+  final Color tertiaryColor;
   final Color textColor;
   final double padding;
+  final double borderWidth;
 
   Style({
     required this.name,
@@ -21,8 +23,10 @@ class Style{
     required this.bgColor,
     required this.primaryColor,
     required this.secondaryColor,
+    required this.tertiaryColor,
     required this.textColor,
     required this.padding,
+    required this.borderWidth,
   });
 }
 
@@ -33,11 +37,13 @@ abstract class ThemeManager{
       titleFontSize: 26,
       subTitleFontSize: 18,
       fontSize: 13,
-      bgColor: const Color.fromARGB(255, 23, 24, 34),
+      bgColor: const Color.fromARGB(255, 20, 20, 35),
       primaryColor: const Color.fromARGB(255, 249, 192, 47),
-      secondaryColor: const Color.fromARGB(255, 42, 45, 62),
+      secondaryColor: const Color.fromARGB(255, 40, 40, 70),
+      tertiaryColor: const Color.fromARGB(255, 60, 60, 105),
       textColor: Colors.white,
-      padding: 8.0
+      padding: 8.0,
+      borderWidth: 1,
     ),
     "BRIGHT": Style(
       name: "BRIGHT",
@@ -45,10 +51,12 @@ abstract class ThemeManager{
       subTitleFontSize: 18,
       fontSize: 13,
       bgColor: Colors.white,
-      primaryColor: const Color.fromARGB(255, 112, 84, 11),
-      secondaryColor: const Color.fromARGB(255, 219, 219, 219),
+      primaryColor: const Color.fromARGB(255, 249, 192, 47),
+      secondaryColor: const Color.fromARGB(255, 210, 210, 210),
+      tertiaryColor: const Color.fromARGB(255, 165, 165, 165),
       textColor: Colors.black,
-      padding: 8.0
+      padding: 8.0,
+      borderWidth: 1,
     ),
   };
 

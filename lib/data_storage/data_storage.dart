@@ -58,4 +58,36 @@ abstract class DataStorage{
       storage[sig]!.everyUpdateNotifier.update();
     }
   }
+
+  static int timeIndexOf(final String sig, final double t, final int latest, [final int after = 0]){
+    if(storage[sig]!.vt.size > latest && storage[sig]!.vt.time[latest] == t){
+      return latest;
+    }
+
+    if(storage[sig]!.vt.time.isEmpty || t < storage[sig]!.vt.time.first){
+      return 0;
+    }
+    else if(t > storage[sig]!.vt.time[storage[sig]!.vt.size - 1]){
+      return storage[sig]!.vt.size;
+    }
+
+    int partStart = after;
+    int partEnd = storage[sig]!.vt.size - 1;
+    double searchIndex = -1;
+    while(partStart < partEnd){
+      searchIndex = ((partStart + partEnd) / 2);
+      if(storage[sig]!.vt.time[searchIndex.toInt()] < t){
+        partStart = searchIndex.ceil();
+      }
+      else if(storage[sig]!.vt.time[searchIndex.toInt()] > t){
+        partEnd = searchIndex.floor();
+      }
+      else{
+        // direkt hit
+        return searchIndex.toInt();
+      }
+    }
+    // nearest
+    return searchIndex.toInt();
+    }
 }

@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-const String mainLogPath = "./Logs/3D.log";
+const String mainLogPath = "./Logs/GS.log";
 Logger localLogger = Logger(mainLogPath, "Initial Logger");
 
 enum LogLevel{

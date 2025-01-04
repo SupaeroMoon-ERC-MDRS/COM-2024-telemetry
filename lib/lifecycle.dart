@@ -29,7 +29,7 @@ abstract class LifeCycle{
     windowManager.maximize();
     windowManager.addListener(root);
     windowManager.setPreventClose(true);
-    DataSource.net();
+    DataSource.selftest();
   }
 
   static Future<void> shutdown() async {

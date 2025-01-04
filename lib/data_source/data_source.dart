@@ -12,6 +12,13 @@ enum _Mode{
 abstract class DataSource{
   static _Mode _mode = _Mode.none;
 
+  static int now(){
+    if(_mode == _Mode.replay){
+      return 0;  // replay time
+    }
+    return DateTime.now().millisecondsSinceEpoch;
+  }
+
   static void net(){
     if(_mode == _Mode.net){
       return;

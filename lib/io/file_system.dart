@@ -12,6 +12,7 @@ abstract class FileSystem{
 
   static String get topDir => "/";
   static String get unitSystemDir => "UnitSystem/";
+  static String get localeDir => "Locale/";
 
   static Future<String?> get getCurrentDirectory async {
     if(_currentDirectory != null){

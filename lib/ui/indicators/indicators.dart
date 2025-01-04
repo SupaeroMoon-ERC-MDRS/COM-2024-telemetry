@@ -1,3 +1,6 @@
-export 'numeric_indicator.dart';
-export 'boolean_indicator.dart';
-export 'scale_indicator.dart';
+export 'numeric.dart';
+export 'boolean.dart';
+export 'scale.dart';
+export 'string.dart';
+export 'rotary.dart';
+export 'chart.dart';

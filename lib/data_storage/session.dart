@@ -5,6 +5,7 @@ abstract class Session{
   static int telemetryPort = 12121;
   static int remotePort = 12122;
   static List<String> dbcPaths = [];
+  static int chartRefreshMs = 16;
 
   static void save(){
     FileSystem.trySaveMapToLocalSync(FileSystem.topDir, "SESSION", {
@@ -12,6 +13,7 @@ abstract class Session{
       "telemetryPort": telemetryPort,
       "remotePort": remotePort,
       "dbcPaths": dbcPaths,
+      "chartRefreshMs": chartRefreshMs,
     });
   }
   
@@ -32,6 +34,10 @@ abstract class Session{
 
     if(data.containsKey("dbcPaths") && data["dbcPaths"] is List){
       dbcPaths = data["dbcPaths"].cast<String>();
+    }
+
+    if(data.containsKey("chartRefreshMs") && data["chartRefreshMs"] is int){
+      chartRefreshMs = data["chartRefreshMs"];
     }
   }
 }

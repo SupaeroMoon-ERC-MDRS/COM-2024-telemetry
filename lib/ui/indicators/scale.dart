@@ -34,7 +34,6 @@ class _ScaleIndicatorState extends State<ScaleIndicator> {
       child: CustomPaint(
         size: const Size(200, 80),
         painter: _ScaleIndicatorPainter(
-          subscribedSignal: widget.subscribedSignal,
           label: label,
           maxValue: widget.maxValue,
           minValue: widget.minValue,
@@ -52,13 +51,12 @@ class _ScaleIndicatorState extends State<ScaleIndicator> {
 }
 
 class _ScaleIndicatorPainter extends CustomPainter {
-  final String subscribedSignal;
   final String label;
   final num maxValue;
   final num minValue;
   final num? value;
 
-  _ScaleIndicatorPainter({required this.subscribedSignal ,required this.label, required this.maxValue, required this.minValue, required this.value});
+  _ScaleIndicatorPainter({required this.label, required this.maxValue, required this.minValue, required this.value});
 
   @override
   void paint(Canvas canvas, Size size) {

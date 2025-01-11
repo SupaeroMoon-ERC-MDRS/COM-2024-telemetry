@@ -28,8 +28,10 @@ abstract class Locale{
 
   static void _read(final String fn){
     final String lang = fn.split('/').last.split('\\').last.split('.').first;
-    final Map<String, String> data = FileSystem.tryLoadMapFromLocalSync(FileSystem.localeDir, "$lang.loc") as Map<String, String>;
-    _localization[lang] = data;
+    final Map<String, String> data = FileSystem.tryLoadMapFromLocalSync(FileSystem.localeDir, "$lang.loc").cast<String, String>();
+    if(data.isNotEmpty){
+      _localization[lang] = data;
+    }
   }
 
   static String get(final String label){

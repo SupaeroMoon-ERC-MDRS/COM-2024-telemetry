@@ -37,7 +37,10 @@ class _AppState extends State<App> with WindowListener {
       debugShowCheckedModeBanner: false,
       title: "Supaeromoon Ground Station",
       theme: ThemeManager.getThemeData(context),
-      routes: {"/":(context) => const MainScreen()},
+      routes: {
+        "/":(context) => const MainScreen(),
+        //"/settings" : ,
+      },
       initialRoute: "/",
     );
   }

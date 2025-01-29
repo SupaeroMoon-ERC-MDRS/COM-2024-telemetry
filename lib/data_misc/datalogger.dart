@@ -24,3 +24,4 @@ Future<Uint8List> readBytes() async{
   }catch(e,s){
     throw 'Error $e : $s';
   }
+}

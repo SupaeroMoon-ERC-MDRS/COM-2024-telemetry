@@ -1,27 +1,64 @@
 import 'dart:typed_data';
 import 'dart:io';
 
-Future<int> writeBytes(final Uint8List bytes) async{
+import 'package:supaeromoon_ground_station/io/logger.dart';
 
-  var file = File('record.bin');
-  var content;
-  try{
-    content = file.writeAsBytes(bytes);
-    return 0;
-  }catch(e,s){
-    throw 'Error $e : $s';
+abstract class Datalogger{
+  static String? _recordPath;
+
+  static bool get isSetup => _recordPath != null;
+
+  static String? get getRecordPath => _recordPath;
+  static bool setRecordPath(final String recordPath, [final bool autoDiscard = false]){
+    final File file = File(recordPath);
+
+    if(file.existsSync()){
+      if(autoDiscard){
+        file.deleteSync();
+        file.createSync();
+      }
+      else{
+        return false;
+      }
+    }
+    else{
+      file.createSync();
+    }
+    _recordPath = recordPath;
+    return true;
   }
-}
 
-Future<Uint8List> readBytes() async{
+  Future<bool> writeBytes(final Uint8List bytes) async {
+    if(_recordPath == null){
+      return false;
+    }
 
-  final file = File('record.bin');
-  file.open(mode: FileMode.read);
+    final File file = File(_recordPath!);
 
-  try{
-    Future<Uint8List> read = file.readAsBytes();
-    return read;
-  }catch(e,s){
-    throw 'Error $e : $s';
+    if(await file.exists()){
+      await file.writeAsBytes(bytes, mode: FileMode.append);
+      return true;
+    }
+    else{
+      localLogger.warning("Datalogger file does not exist at $_recordPath", doNoti: false);
+      return false;
+    }
+  }
+
+  Future<Uint8List?> readBytes() async {
+    if(_recordPath == null){
+      return null;
+    }
+
+    final file = File(_recordPath!);
+    file.open(mode: FileMode.read);
+
+    if(await file.exists()){
+      return await file.readAsBytes();
+    }
+    else{
+      localLogger.warning("Datalogger file does not exist at $_recordPath", doNoti: false);
+      return null;
+    }
   }
 }

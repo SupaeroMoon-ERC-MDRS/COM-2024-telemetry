@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:supaeromoon_ground_station/data_source/data_source.dart';
 import 'package:supaeromoon_ground_station/data_source/database.dart';
+import 'package:supaeromoon_ground_station/data_source/netcode_interop.dart';
 import 'package:supaeromoon_ground_station/data_storage/data_storage.dart';
 import 'package:supaeromoon_ground_station/data_storage/session.dart';
 import 'package:supaeromoon_ground_station/io/file_system.dart';
@@ -29,6 +30,7 @@ abstract class LifeCycle{
     windowManager.maximize();
     windowManager.addListener(root);
     windowManager.setPreventClose(true);
+    NetCode.loadDLL();
     DataSource.selftest();
   }
 

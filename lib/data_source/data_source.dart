@@ -2,7 +2,7 @@ import 'package:supaeromoon_ground_station/data_source/net.dart';
 import 'package:supaeromoon_ground_station/data_source/replay.dart';
 import 'package:supaeromoon_ground_station/data_source/selftest.dart';
 
-enum _Mode{
+enum DataSourceMode{
   none,
   net,
   replay,
@@ -10,72 +10,74 @@ enum _Mode{
 }
 
 abstract class DataSource{
-  static _Mode _mode = _Mode.none;
+  static DataSourceMode _mode = DataSourceMode.none;
 
   static int now(){
-    if(_mode == _Mode.replay){
+    if(_mode == DataSourceMode.replay){
       return 0;  // replay time
     }
     return DateTime.now().millisecondsSinceEpoch;
   }
 
   static void net(){
-    if(_mode == _Mode.net){
+    if(_mode == DataSourceMode.net){
       return;
     }
-    else if(_mode == _Mode.replay){
+    else if(_mode == DataSourceMode.replay){
       Replay.stop();
     }
-    else if(_mode == _Mode.selftest){
+    else if(_mode == DataSourceMode.selftest){
       Selftest.stop();
     }
 
     Net.start();
-    _mode = _Mode.net;
+    _mode = DataSourceMode.net;
   }
 
   static void replay(){
-    if(_mode == _Mode.replay){
+    if(_mode == DataSourceMode.replay){
       return;
     }
-    else if(_mode == _Mode.net){
+    else if(_mode == DataSourceMode.net){
       Net.stop();
     }
-    else if(_mode == _Mode.selftest){
+    else if(_mode == DataSourceMode.selftest){
       Selftest.stop();
     }
 
     Replay.start();
-    _mode = _Mode.replay;
+    _mode = DataSourceMode.replay;
   }
 
   static void selftest(){
-    if(_mode == _Mode.selftest){
+    if(_mode == DataSourceMode.selftest){
       return;
     }
-    else if(_mode == _Mode.net){
+    else if(_mode == DataSourceMode.net){
       Net.stop();
     }
-    else if(_mode == _Mode.replay){
+    else if(_mode == DataSourceMode.replay){
       Replay.stop();
     }
 
     Selftest.start();
-    _mode = _Mode.selftest;
+    _mode = DataSourceMode.selftest;
   }
 
   static void stop(){
-    if(_mode == _Mode.replay){
+    if(_mode == DataSourceMode.replay){
       Replay.stop();
     }
-    else if(_mode == _Mode.selftest){
+    else if(_mode == DataSourceMode.selftest){
       Selftest.stop();
     }
-    else if(_mode == _Mode.selftest){
+    else if(_mode == DataSourceMode.selftest){
       Selftest.stop();
     }
-    _mode = _Mode.none;
+    _mode = DataSourceMode.none;
   }
 
-  static bool get isActive => _mode != _Mode.none;
+  static bool get isActive => _mode != DataSourceMode.none;
+
+  static bool isMode(final DataSourceMode mode) => mode == _mode;
 }

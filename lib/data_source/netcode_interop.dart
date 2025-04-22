@@ -94,7 +94,7 @@ typedef NetSendDiscD = int Function(NetC p, int port);
 
 
 abstract class _NetCodeDLL{
-  static late final BytesCreateCD bytesCreate;
+  //static late final BytesCreateCD bytesCreate;
   static late final BytesFromD bytesFrom;
   static late final BytesDestroyD bytesDestroy;
   static late final BytesDataD bytesData;
@@ -109,7 +109,7 @@ abstract class _NetCodeDLL{
   static late final PacketGetTypeD packetGetType;
   static late final PacketGetIPCD packetGetIP;
   static late final PacketGetPortD packetGetPort;
-  static late final PacketDestroyD packetDestroy;
+  //static late final PacketDestroyD packetDestroy;
 
   static late final NetCreateCD netCreate;
   static late final NetDestroyD netDestroy;
@@ -139,7 +139,7 @@ abstract class _NetCodeDLL{
     try{
       final DynamicLibrary dll = DynamicLibrary.open("udpcan-net-exports.dll");
 
-      bytesCreate = dll.lookup<NativeFunction<BytesCreateCD>>('BytesCreate').asFunction<BytesCreateCD>();
+      //bytesCreate = dll.lookup<NativeFunction<BytesCreateCD>>('BytesCreate').asFunction<BytesCreateCD>();
       bytesFrom = dll.lookup<NativeFunction<BytesFromC>>('BytesFrom').asFunction<BytesFromD>();
       bytesDestroy = dll.lookup<NativeFunction<BytesDestroyC>>('BytesDestroy').asFunction<BytesDestroyD>();
       bytesData = dll.lookup<NativeFunction<BytesDataC>>('BytesData').asFunction<BytesDataD>();
@@ -154,7 +154,7 @@ abstract class _NetCodeDLL{
       packetGetType = dll.lookup<NativeFunction<PacketGetTypeC>>('PacketGetType').asFunction<PacketGetTypeD>();
       packetGetIP = dll.lookup<NativeFunction<PacketGetIPCD>>('PacketGetIP').asFunction<PacketGetIPCD>();
       packetGetPort = dll.lookup<NativeFunction<PacketGetPortC>>('PacketGetPort').asFunction<PacketGetPortD>();
-      packetDestroy = dll.lookup<NativeFunction<PacketDestroyC>>('PacketDestroy').asFunction<PacketDestroyD>();
+      //packetDestroy = dll.lookup<NativeFunction<PacketDestroyC>>('PacketDestroy').asFunction<PacketDestroyD>();
 
       netCreate = dll.lookup<NativeFunction<NetCreateCD>>('NetCreate').asFunction<NetCreateCD>();
       netDestroy = dll.lookup<NativeFunction<NetDestroyC>>('NetDestroy').asFunction<NetDestroyD>();

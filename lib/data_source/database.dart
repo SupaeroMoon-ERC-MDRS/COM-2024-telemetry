@@ -353,12 +353,12 @@ class DBCMessage{
     return signals.map((name, sig) => MapEntry(name, sig.decode(messagePayloadBits)));
   }
 
-  Uint8List encode(final Map<String, num> values, final int version){
+  Uint8List encode(final Map<String, num> values){
     Bitarray msg = Bitarray.from(Uint8List(messageLen));
     for(final MapEntry<String, num> value in values.entries){
       msg |= signals[value.key]!.encode(value.value);
     }
-    return Uint8List.fromList([version & 0x00FF, version & 0xFF00 >> 8, id, ...msg.buf]);
+    return Uint8List.fromList([id, ...msg.buf]);
   }
 }
 
@@ -407,14 +407,7 @@ abstract class DBCDatabase{
     final List<MapEntry<int, Map<String, num>>> ret = [];
     int pos = 0;
 
-    while(pos + 4 < bytes.length){ // 2 dbc version 1 msg id +1 min msg size = 4u
-      int msgVersion = bytes[pos] + 256 * bytes[pos + 1];
-      if(msgVersion != dbcVersion){
-          localLogger.warning("Message with wrong version was received: $msgVersion", doNoti: false);
-          return [];
-      }
-      pos += 2;
-      
+    while(pos + 2 < bytes.length){ // 1 msg id +1 min msg size = 2u      
       int id = bytes[pos];
       if(!messages.containsKey(id)){
           localLogger.warning("Unknown message was received with $id", doNoti: false);
@@ -448,7 +441,7 @@ abstract class DBCDatabase{
         continue;
       }
 
-      buf.addAll(messages[msg.key]!.encode(msg.value, dbcVersion));
+      buf.addAll(messages[msg.key]!.encode(msg.value));
     }
     return Uint8List.fromList(buf);
   }

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:supaeromoon_ground_station/data_source/data_source.dart';
 import 'package:supaeromoon_ground_station/data_source/database.dart';
@@ -11,6 +10,16 @@ import 'package:supaeromoon_ground_station/io/logger.dart';
 abstract class Net{
   static late NetCode _net;
   static late Timer _timer;
+  static int _lastConnectionAttempt = 0;
+  static bool _hasRover = false;
+  static bool _hasRemote = false;
+
+  static Map<String, bool> getStatus(){
+    return {
+      "rover": _hasRover,
+      "remote": _hasRemote,
+    };
+  }
 
   static bool _setup(){
     _net = NetCode();
@@ -29,12 +38,23 @@ abstract class Net{
     _setup();
     _timer = Timer.periodic(const Duration(milliseconds: 1), (timer) {
       if(_net.isInitialized() && !_net.needReset()){
-        if(timer.tick & 0xFF == 0){
+        if(timer.tick - _lastConnectionAttempt > 1000){ // every 1 sec TODO session
+          _lastConnectionAttempt = timer.tick;
+
           if(!_net.hasPublishersType(NodeType.rover)){
             _net.sendConn(12121);
-          }        
+            _hasRover = false;
+          }
+          else{
+            _hasRover = true;
+          }
+
           if(!_net.hasPublishersType(NodeType.remote)){
             _net.sendConn(12122);
+            _hasRemote = false;
+          }
+          else{
+            _hasRemote = true;
           }
         }
 
@@ -64,6 +84,9 @@ abstract class Net{
 
   static void stop(){
     _timer.cancel();
+    _net.shutdown();
+    _hasRover = false;
+    _hasRemote = false;
     _net.destroy();
   }
 }

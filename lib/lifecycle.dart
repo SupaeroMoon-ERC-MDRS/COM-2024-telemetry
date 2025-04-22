@@ -30,8 +30,13 @@ abstract class LifeCycle{
     windowManager.maximize();
     windowManager.addListener(root);
     windowManager.setPreventClose(true);
-    NetCode.loadDLL();
-    DataSource.selftest();
+    if(NetCode.loadDLL()){
+      DataSource.net();
+    }
+    else{
+      localLogger.critical("Netcode loading failed, shutting down", doNoti: false);
+      exit(1);
+    }
   }
 
   static Future<void> shutdown() async {

@@ -1,13 +1,21 @@
+import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
 import 'package:supaeromoon_ground_station/data_storage/session.dart';
+import 'package:supaeromoon_ground_station/io/localization.dart';
+import 'package:supaeromoon_ground_station/lifecycle.dart';
+import 'package:supaeromoon_ground_station/ui/input_widgets/dash_menu.dart';
 import 'package:supaeromoon_ground_station/ui/input_widgets/sliding_switch.dart';
 import 'package:supaeromoon_ground_station/ui/tabs/tab_base.dart';
+import 'package:supaeromoon_ground_station/ui/theme.dart';
 
 final TabTreeController _tabTreeController = TabTreeController(index: Session.tabIndex);
+final DashController _dashController = DashController(
+  icons: _tabTreeController.tree.map((e) => e.icon).toList(),
+);
 
 final SlidingSwitchController<int> _topMenuController = SlidingSwitchController(
   items: List.generate(_tabTreeController.tree.length, (index) => index),
-  names: _tabTreeController.tree.map((e) => e.key).toList(),
+  names: _tabTreeController.tree.map((e) => e.name).toList(),
   onChanged: (final int sel){
     _tabTreeController.index = sel;
     Session.tabIndex = sel;
@@ -25,12 +33,25 @@ class MainScreen extends StatelessWidget {
       body: Column(
         children: [
           const TopMenu(),
-          TabTree(controller: _tabTreeController),
-          SizedBox(
-            height: 100,
-            child: Container(
-              color: Colors.red
-            )
+          Expanded(
+            child: Row(
+              children: [
+                DashMenuSlidingSwitch(controller: _topMenuController, dashController: _dashController,),
+                Expanded(
+                  child: Column(
+                    children: [
+                      Expanded(child: TabTree(controller: _tabTreeController)),
+                      SizedBox(
+                        height: 100,
+                        child: Container(
+                          color: Colors.red
+                        )
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -43,15 +64,58 @@ class TopMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 100,
-      child: Column(
+    return Container(
+      height: 30,
+      color: ThemeManager.globalStyle.secondaryColor,
+      child: Row(
         children: [
-          SizedBox(
-            height: 50,
-            child: Row()
+          IconButton(
+            onPressed: (){
+              _dashController.toggleOpen();
+            },
+            iconSize: ThemeManager.globalStyle.subTitleFontSize + 6,
+            padding: EdgeInsets.zero,
+            splashColor: Colors.grey,
+            icon: const Icon(Icons.menu)
           ),
-          SlidingSwitch(controller: _topMenuController)
+          
+          Expanded(
+            child: Container(
+              color: ThemeManager.globalStyle.secondaryColor,
+              child: MoveWindow(
+                child: Row(
+                  children: [
+                    Text(Loc.get("ground_station_title"),
+                      style: ThemeManager.subTitleStyle.copyWith(color: ThemeManager.globalStyle.primaryColor, fontWeight: FontWeight.bold)
+                    ),
+                  ],
+                ),
+              ),
+            )
+          ),
+          IconButton(
+            onPressed: (){
+              ThemeManager.changeStyle(ThemeManager.activeStyle == "DARK" ? "BRIGHT" : "DARK");
+            },
+            iconSize: ThemeManager.globalStyle.subTitleFontSize + 6,
+            padding: EdgeInsets.zero,
+            splashColor: Colors.grey,
+            icon: Icon(ThemeManager.activeStyle == "DARK" ? Icons.dark_mode : Icons.light_mode)
+          ),
+          MinimizeWindowButton(colors: ThemeManager.windowButtonColors,),
+          appWindow.isMaximized
+            ? RestoreWindowButton(colors: ThemeManager.windowButtonColors,
+                onPressed: appWindow.maximizeOrRestore,
+              )
+            : MaximizeWindowButton(colors: ThemeManager.windowButtonColors,
+                onPressed: appWindow.maximizeOrRestore,
+              ),
+          CloseWindowButton(
+            colors: ThemeManager.windowButtonColors..mouseOver = Colors.red,
+            onPressed: () async {
+              await LifeCycle.shutdown();
+            },
+          ),
         ],
       ),
     );

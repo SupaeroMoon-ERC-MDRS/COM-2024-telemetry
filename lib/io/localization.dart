@@ -1,8 +1,9 @@
 import 'dart:io';
 
 import 'package:supaeromoon_ground_station/io/file_system.dart';
+import 'package:supaeromoon_ground_station/io/localization_default.dart';
 
-abstract class Locale{
+abstract class Loc{
   static final Map<String, Map<String, String>> _localization = {};
   static String _lang = "NONE";
 
@@ -18,6 +19,11 @@ abstract class Locale{
 
   static bool load(){
     final Iterable<FileSystemEntity> elements = FileSystem.tryListElementsInLocalSync(FileSystem.localeDir).where((element) => element.path.endsWith(".loc"));
+
+    if(elements.isEmpty){
+      _localization["en-EN"] = en_EN;
+      FileSystem.trySaveMapToLocalAsync(FileSystem.localeDir, "en-EN.loc", en_EN, withIndent: true);
+    }
 
     for(final FileSystemEntity elem in elements){
       _read(elem.absolute.path);

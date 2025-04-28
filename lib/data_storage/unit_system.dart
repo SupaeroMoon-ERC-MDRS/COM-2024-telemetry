@@ -83,7 +83,7 @@ abstract class UnitSystem{
     jsonEncodeable["conversions"] = _conversionTable.toJson();
     jsonEncodeable["compositions"] = _compositionTable.toJson();
 
-    FileSystem.trySaveMapToLocalAsync(FileSystem.unitSystemDir, "unit_system.json", jsonEncodeable, withIndent: true);
+    FileSystem.trySaveMapToLocalAsync(FileSystem.topDir, "unit_system.json", jsonEncodeable, withIndent: true);
   }
 
   static void _loadDefaults(){
@@ -323,7 +323,7 @@ abstract class UnitSystem{
     _unitDescriptions.clear();
     _conversionTable.conversionsToBase.clear();
     _compositionTable.compositions.clear();
-    Map data = await FileSystem.tryLoadMapFromLocalAsync(FileSystem.unitSystemDir, "unit_system.json");
+    Map data = await FileSystem.tryLoadMapFromLocalAsync(FileSystem.topDir, "unit_system.json");
     if(data.isEmpty){
       return _setDefaults();
     }

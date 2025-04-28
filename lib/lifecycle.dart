@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
+import 'package:supaeromoon_ground_station/data_misc/alarm.dart';
 import 'package:supaeromoon_ground_station/data_source/data_source.dart';
 import 'package:supaeromoon_ground_station/data_source/database.dart';
 import 'package:supaeromoon_ground_station/data_source/netcode_interop.dart';
@@ -31,6 +32,7 @@ abstract class LifeCycle{
       }
     }
     DataStorage.setup();
+    AlarmController.load();
   }
 
   static void postInit(WindowListener root){
@@ -50,6 +52,7 @@ abstract class LifeCycle{
     DataSource.stop();
     Session.save();
     await localLogger.stop();
+    AlarmController.save();
     exit(0);
   }
 }

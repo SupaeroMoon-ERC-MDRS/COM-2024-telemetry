@@ -11,7 +11,6 @@ abstract class FileSystem{
   static String? _currentDirectory;
 
   static String get topDir => "/";
-  static String get unitSystemDir => "UnitSystem/";
   static String get localeDir => "Locale/";
 
   static Future<String?> get getCurrentDirectory async {
@@ -91,7 +90,7 @@ abstract class FileSystem{
       await file.delete();
     }
     try{
-      return SerDes.jsonFromBytes(buffer);
+      return SerDes.jsonFromBytes(buffer) as Map;
     }catch(ex){
       localLogger.error("Cannot parse json at ${file.absolute.path}");
       return {};
@@ -112,7 +111,7 @@ abstract class FileSystem{
       file.deleteSync();
     }
     try{
-      return SerDes.jsonFromBytes(buffer);
+      return SerDes.jsonFromBytes(buffer) as Map ;
     }catch(ex){
       localLogger.error("Cannot parse json at ${file.absolute.path}");
       return {};

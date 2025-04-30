@@ -1,5 +1,6 @@
 import 'package:supaeromoon_ground_station/data_storage/data_storage.dart';
 import 'package:supaeromoon_ground_station/io/file_system.dart';
+import 'package:supaeromoon_ground_station/io/logger.dart';
 import 'package:supaeromoon_ground_station/io/serdes.dart';
 
 class Alarm{
@@ -70,11 +71,26 @@ abstract class AlarmController{
   static List<Alarm> get alarms => _alarms;
 
   static void load(){
-    final List<Map> ser = SerDes.jsonFromBytes(
-      FileSystem.tryLoadBytesFromLocalSync(FileSystem.topDir, "ALARMS")
-    ) as List<Map>;
+    final List<Map> ser;
+    try{
+      ser = SerDes.jsonFromBytes(
+        FileSystem.tryLoadBytesFromLocalSync(FileSystem.topDir, "ALARMS")
+      ) as List<Map>;
+    }catch(ex){
+      localLogger.error("Failed to load alarms: ${ex.toString()}");
+      return;
+    }
 
-    _alarms.addAll(ser.map((e) => Alarm.fromMap(e)));
+    _alarms.addAll(ser.map((e){
+      try{
+        return Alarm.fromMap(e);
+      }catch(ex){
+        localLogger.error("Failed to parse alarm: ${ex.toString()}");
+        return Alarm(signal: "NOSIG", active: false, inRange: false, min: 0, max: 0);
+      }
+    }));
+    _alarms.removeWhere((alarm) => alarm.signal == "NOSIG");
+
     for(final Alarm alarm in _alarms){
       alarm.register();
     }

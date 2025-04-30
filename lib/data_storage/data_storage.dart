@@ -83,7 +83,7 @@ abstract class DataStorage{
         partEnd = searchIndex.floor();
       }
       else{
-        // direkt hit
+        // direct hit
         return searchIndex.toInt();
       }
     }

@@ -9,10 +9,10 @@ abstract class SerDes {
   static Utf8Decoder utf8Decoder = const Utf8Decoder();
   static JsonDecoder jsonDecoder = const JsonDecoder();
 
-  static Uint8List jsonToBytes(Map jsonEncodeable) => utf8Encoder.convert(jsonEncoder.convert(jsonEncodeable));
-  static Uint8List prettyJsonToBytes(Map jsonEncodeable) => utf8Encoder.convert(jsonEncoderWithIndent.convert(jsonEncodeable));
+  static Uint8List jsonToBytes(Object? jsonEncodeable) => utf8Encoder.convert(jsonEncoder.convert(jsonEncodeable));
+  static Uint8List prettyJsonToBytes(Object? jsonEncodeable) => utf8Encoder.convert(jsonEncoderWithIndent.convert(jsonEncodeable));
 
-  static Map jsonFromBytes(List<int> bytes) => jsonDecoder.convert(safeUTF8Decode(bytes));
+  static Object jsonFromBytes(List<int> bytes) => jsonDecoder.convert(safeUTF8Decode(bytes));
   
     static String safeUTF8Decode(List<int> bytes) {
     // when there is 176 before there should be 194

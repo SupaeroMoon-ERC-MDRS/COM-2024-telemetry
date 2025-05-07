@@ -84,10 +84,10 @@ abstract class Selftest{
       final Uint8List bytes = DBCDatabase.encode(data);
       //Datalogger.maybeSaveData(bytes);
 
-      final List<MapEntry<int, Map<String, num>>> rec = DBCDatabase.decode(bytes);
+      final List<MapEntry<int, Map<String, dynamic>>> rec = DBCDatabase.decode(bytes);
       final int recTime = DataSource.now();
 
-      for(final MapEntry<int, Map<String, num>> msg in rec){
+      for(final MapEntry<int, Map<String, dynamic>> msg in rec){
         for(final String sig in msg.value.keys){
           DataStorage.update(sig, msg.value[sig]!, recTime);
         }

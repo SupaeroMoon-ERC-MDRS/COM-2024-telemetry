@@ -14,8 +14,9 @@ abstract class Replay{
   static bool stop = false;
   static bool active = false;
   static void _setup(){
-      pos = 0;
+    pos = 0;
 
+    //First time setup, run once
   }
 
   static void start() async{
@@ -30,8 +31,8 @@ abstract class Replay{
 
   }
 
-  static void stop(){
-
+  static void stopReplay(){
+    // cleanup
   }
 
   static void process() async{
@@ -51,9 +52,9 @@ abstract class Replay{
     Uint8List line = bytes!.sublist(pos, pos + len);
     pos += len;
 
-    final List<MapEntry<int, Map<String, num>>> rec = DBCDatabase.decode(line);
+    final List<MapEntry<int, Map<String, dynamic>>> rec = DBCDatabase.decode(line);
 
-    for(final MapEntry<int, Map<String, num>> msg in rec){
+    for(final MapEntry<int, Map<String, dynamic>> msg in rec){
       for(final String sig in msg.value.keys){
         DataStorage.update(sig, msg.value[sig]!, timestamp);
       }

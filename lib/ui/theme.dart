@@ -1,3 +1,4 @@
+import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:supaeromoon_ground_station/data_misc/notifiers.dart';
@@ -39,8 +40,8 @@ abstract class ThemeManager{
       fontSize: 13,
       bgColor: const Color.fromARGB(255, 20, 20, 35),
       primaryColor: const Color.fromARGB(255, 249, 192, 47),
-      secondaryColor: const Color.fromARGB(255, 40, 40, 70),
-      tertiaryColor: const Color.fromARGB(255, 60, 60, 105),
+      secondaryColor: const Color.fromARGB(255, 30, 30, 60),
+      tertiaryColor: const Color.fromARGB(255, 40, 40, 85),
       textColor: Colors.white,
       padding: 8.0,
       borderWidth: 1,
@@ -98,5 +99,6 @@ abstract class ThemeManager{
   static TextStyle get subTitleStyle => TextStyle(color: globalStyle.textColor, fontSize: globalStyle.subTitleFontSize);
   static TextStyle get titleStyle => TextStyle(color: globalStyle.textColor, fontSize: globalStyle.titleFontSize);
 
+  static WindowButtonColors get windowButtonColors => WindowButtonColors(iconNormal: globalStyle.primaryColor);
   static String get activeStyle => globalStyle.name;
 }

@@ -34,7 +34,7 @@ const List<Widget> dummyTab1 = [
       Flexible(
         child: TimeSeriesChart(
           subscribedSignals: ["thumb_left_x", "thumb_right_x", "thumb_left_y", "thumb_right_y"],
-          title: "asd",
+          title: "Thumbs",
           min: 0,
           max: 255
         ),

@@ -1,12 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:supaeromoon_ground_station/data_misc/notifiers.dart';
 import 'package:supaeromoon_ground_station/ui/tabs/tmp.dart';
+import 'package:supaeromoon_ground_station/ui/theme.dart';
+
+class TabEntry{
+  final String name;
+  final IconData icon;
+  final List<Widget> tree;
+
+  const TabEntry({required this.name, required this.icon, required this.tree});
+}
 
 class TabTreeController{
-  final List<MapEntry<String, List<Widget>>> tree = const [
-    MapEntry("Dummy1", dummyTab1),
-    MapEntry("Dummy2", dummyTab2),
-    MapEntry("Dummy3", dummyTab3),
+  final List<TabEntry> tree = const [
+    TabEntry(name: "Dummy1", icon: Icons.tab, tree: dummyTab1),
+    TabEntry(name: "Dummy2", icon: Icons.tab, tree: dummyTab2),
+    TabEntry(name: "Dummy3", icon: Icons.tab, tree: dummyTab3),
   ];
   final BlankNotifier notifier = BlankNotifier(null);
   int index;
@@ -34,12 +43,13 @@ class _TabTreeState extends State<TabTree> {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: ThemeManager.globalStyle.padding),
       child: ListView(
         key: UniqueKey(),
         cacheExtent: 1000,
-        children: widget.controller.tree[widget.controller.index].value
-      )
+        children: widget.controller.tree[widget.controller.index].tree
+      ),
     );
   }
 

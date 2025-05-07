@@ -4,6 +4,14 @@ import 'dart:typed_data';
 
 import 'package:supaeromoon_ground_station/io/logger.dart';
 
+class _IntRef{
+  int v = -1;
+}
+
+class _TDRef{
+  TypedData v = Uint8List(0);
+}
+
 class CharBuf{
   final String str;
   int g = 0;
@@ -231,6 +239,120 @@ class Bitarray{
   }
 }
 
+enum ENumType{
+  // ignore: constant_identifier_names
+  NU8,
+  // ignore: constant_identifier_names
+  NU16,
+  // ignore: constant_identifier_names
+  NU32,
+  // ignore: constant_identifier_names
+  NU64,
+  // ignore: constant_identifier_names
+  NI8,
+  // ignore: constant_identifier_names
+  NI16,
+  // ignore: constant_identifier_names
+  NI32,
+  // ignore: constant_identifier_names
+  NI64,
+  // ignore: constant_identifier_names
+  NF32
+}
+
+const Map<ENumType, int> typeSize = {
+  ENumType.NU8 : 1,
+  ENumType.NU16 : 2,
+  ENumType.NU32 : 4,
+  ENumType.NU64 : 8,
+  ENumType.NI8 : 1,
+  ENumType.NI16 : 2,
+  ENumType.NI32 : 4,
+  ENumType.NI64 : 8,
+  ENumType.NF32 : 4
+};
+
+class DBCVectorSignal{
+  final String name;
+  final ENumType type;
+
+  const DBCVectorSignal._({
+    required this.name,
+    required this.type,
+  });
+
+  factory DBCVectorSignal.parse(final CharBuf buf, final int eof){
+    buf.seekg(buf.tellg() + 3);
+    String? name = Reader.readNextString(buf, eof);
+    int? typeId = Reader.readNextNumeric(buf, eof);
+
+    if(name != null && typeId != null && typeId < ENumType.values.length){
+      return DBCVectorSignal._(
+        name: name,
+        type: ENumType.values[typeId],
+      );
+    }
+    final String msg = "Cannot parse signal at ${buf.tellg()}";
+    localLogger.warning(msg, doNoti: false);
+    throw Exception(msg);
+  }
+
+  // ignore: library_private_types_in_public_api
+  bool decode(final Uint8List bytes, _TDRef out, final int startPos, final _IntRef endPos){
+    if(startPos + 4 >= bytes.length){
+      return false;
+    }
+    final ByteData bdata = bytes.buffer.asByteData();
+    final int len = bdata.getUint32(startPos, Endian.host);
+    endPos.v = startPos + 4 + len * typeSize[type]!;
+
+    if(endPos.v > bytes.length){
+      return false;
+    }
+    if(type == ENumType.NU8){
+      out.v = Uint8List.sublistView(bdata, startPos + 4, endPos.v);
+      return true;
+    }
+    else if(type == ENumType.NU16){
+      out.v = Uint16List.sublistView(bytes.sublist(startPos + 4, endPos.v));
+      return true;
+    }
+    else if(type == ENumType.NU32){
+      out.v = Uint32List.sublistView(bytes.sublist(startPos + 4, endPos.v));
+      return true;
+    }
+    else if(type == ENumType.NU64){
+      out.v = Uint64List.sublistView(bytes.sublist(startPos + 4, endPos.v));
+      return true;
+    }
+    else if(type == ENumType.NI8){
+      out.v = Int8List.sublistView(bdata, startPos + 4, endPos.v);
+      return true;
+    }
+    else if(type == ENumType.NI16){
+      out.v = Int16List.sublistView(bytes.sublist(startPos + 4, endPos.v));
+      return true;
+    }
+    else if(type == ENumType.NI32){
+      out.v = Int32List.sublistView(bytes.sublist(startPos + 4, endPos.v));
+      return true;
+    }
+    else if(type == ENumType.NI64){
+      out.v = Int64List.sublistView(bytes.sublist(startPos + 4, endPos.v));
+      return true;
+    }
+    else if(type == ENumType.NF32){
+      out.v = Float32List.sublistView(bytes.sublist(startPos + 4, endPos.v));
+      return true;
+    }
+    return false;
+  }
+
+  /*Uint8List encode(final TypedData val){
+    
+  }*/
+}
+
 class DBCSignal{
   final String name;
   final Bitarray mask;
@@ -301,10 +423,11 @@ class DBCSignal{
 
 class DBCMessage{
   final Map<String, DBCSignal> signals;
+  final List<DBCVectorSignal> vectorSignals;
   final int id;
   final int messageLen;
 
-  DBCMessage._({required this.signals, required this.id, required this.messageLen});
+  DBCMessage._({required this.signals, required this.vectorSignals, required this.id, required this.messageLen});
 
   factory DBCMessage.parse(final CharBuf buf){
     final int? id = Reader.readNextNumeric(buf, buf.str.length);
@@ -328,6 +451,7 @@ class DBCMessage{
     buf.seekg(pos);
 
     final Map<String, DBCSignal> signals = {};
+    final List<DBCVectorSignal> vectorSignals = [];
     while(true){
       try{
       Reader.seekUntil(buf, msgEof, "SG_");
@@ -336,29 +460,70 @@ class DBCMessage{
         if(signals.isEmpty){
           rethrow;
         }
-        return DBCMessage._(signals: signals, id: id, messageLen: messageLen);
+        return DBCMessage._(signals: signals, vectorSignals: vectorSignals, id: id, messageLen: messageLen);
       }
 
-      try{
-      DBCSignal sig = DBCSignal.parse(buf, messageLen, msgEof);
-      signals[sig.name] = sig;
+      int pos = buf.tellg();
+      buf.seekg(pos - 1);
+      bool isVec = buf.peek() == 'V';
+      buf.seekg(pos);
+
+      if(isVec){
+        try{
+          DBCVectorSignal sig = DBCVectorSignal.parse(buf, msgEof);
+          vectorSignals.add(sig);
+        }
+        catch(exc){
+          localLogger.warning("Could not parse signal in message $name");
+        }
       }
-      catch(exc){
-        localLogger.warning("Could not parse signal in message $name");
+      else{
+        try{
+          DBCSignal sig = DBCSignal.parse(buf, messageLen, msgEof);
+          signals[sig.name] = sig;
+        }
+        catch(exc){
+          localLogger.warning("Could not parse signal in message $name");
+        }
       }
     }
   }
 
-  Map<String, num> decode(final Bitarray messagePayloadBits){
-    return signals.map((name, sig) => MapEntry(name, sig.decode(messagePayloadBits)));
+  // ignore: library_private_types_in_public_api
+  Map<String, dynamic> decode(final Uint8List bytes, final _IntRef msgSize){
+    final Map<String, dynamic> res = {};
+    if(signals.isNotEmpty){
+      final Bitarray messagePayloadBits = Bitarray.from(bytes.sublist(0, messageLen));
+      res.addAll(signals.map((name, sig) => MapEntry(name, sig.decode(messagePayloadBits))));
+      msgSize.v = messageLen;
+    }
+    if(vectorSignals.isNotEmpty){
+      int startPos = messageLen;
+      _IntRef endPos = _IntRef();
+      for(final DBCVectorSignal sig in vectorSignals){
+        _TDRef out = _TDRef();
+        if(sig.decode(bytes, out, startPos, endPos)){
+          res[sig.name] = out.v;
+        }
+        else{
+          localLogger.warning("Vector signal decode failed", doNoti: false);
+        }
+        startPos = endPos.v;
+      }
+      msgSize.v = endPos.v;
+    }
+    return res;
   }
 
-  Uint8List encode(final Map<String, num> values, final int version){
+  Uint8List encode(final Map<String, num> values){
+    if(vectorSignals.isNotEmpty){
+      localLogger.warning("Vector signal encoding was not implemented", doNoti: false);
+    }
     Bitarray msg = Bitarray.from(Uint8List(messageLen));
     for(final MapEntry<String, num> value in values.entries){
       msg |= signals[value.key]!.encode(value.value);
     }
-    return Uint8List.fromList([version & 0x00FF, version & 0xFF00 >> 8, id, ...msg.buf]);
+    return Uint8List.fromList([id, ...msg.buf]);
   }
 }
 
@@ -403,18 +568,11 @@ abstract class DBCDatabase{
     }
   }
 
-  static List<MapEntry<int, Map<String, num>>> decode(final Uint8List bytes){
-    final List<MapEntry<int, Map<String, num>>> ret = [];
+  static List<MapEntry<int, Map<String, dynamic>>> decode(final Uint8List bytes){
+    final List<MapEntry<int, Map<String, dynamic>>> ret = [];
     int pos = 0;
 
-    while(pos + 4 < bytes.length){ // 2 dbc version 1 msg id +1 min msg size = 4u
-      int msgVersion = bytes[pos] + 256 * bytes[pos + 1];
-      if(msgVersion != dbcVersion){
-          localLogger.warning("Message with wrong version was received: $msgVersion", doNoti: false);
-          return [];
-      }
-      pos += 2;
-      
+    while(pos + 2 < bytes.length){ // 1 msg id +1 min msg size = 2u      
       int id = bytes[pos];
       if(!messages.containsKey(id)){
           localLogger.warning("Unknown message was received with $id", doNoti: false);
@@ -422,15 +580,15 @@ abstract class DBCDatabase{
       }
       pos += 1;
 
-      int msgSize = messages[id]!.messageLen;
-      if(pos + msgSize < bytes.length){
+      int msgSizeMin = messages[id]!.messageLen;
+      if(pos + msgSizeMin > bytes.length){
           localLogger.warning("Partial message received for id $id", doNoti: false);
           return [];
       }
 
-      Bitarray msgPayload = Bitarray.from(bytes.sublist(pos, pos + msgSize));
-      ret.add(MapEntry(id, messages[id]!.decode(msgPayload)));
-      pos += msgSize;
+      _IntRef msgSize = _IntRef();
+      ret.add(MapEntry(id, messages[id]!.decode(bytes.sublist(pos), msgSize)));
+      pos += msgSize.v;
     }
     return ret;
   }
@@ -448,8 +606,15 @@ abstract class DBCDatabase{
         continue;
       }
 
-      buf.addAll(messages[msg.key]!.encode(msg.value, dbcVersion));
+      buf.addAll(messages[msg.key]!.encode(msg.value));
     }
     return Uint8List.fromList(buf);
   }
 }
+
+/*void main(){
+  final Uint8List bytes = Uint8List.fromList([15,10,12,14,16,6,0,0,0,0,10,1,9,2,8,6,0,0,0,246,255,255,255,10,0,0,0,1,0,0,0,255,255,255,255,2,0,0,0,254,255,255,255,14,20,22,24,26,6,0,0,0,10,1,9,2,8,0,6,0,0,0,10,0,0,0,1,0,0,0,255,255,255,255,2,0,0,0,254,255,255,255,246,255,255,255]);
+  DBCDatabase.parse("C:/Users/Lenovo/Desktop/COM-2024/COM-2024-udpcanlib/modules/can/test/test.dbc");
+  final List<MapEntry<int, Map<String, dynamic>>> res = DBCDatabase.decode(bytes);
+  var a = 0;
+}*/

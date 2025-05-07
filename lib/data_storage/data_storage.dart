@@ -24,20 +24,32 @@ abstract class DataStorage{
     "thumb_right_y" : SignalContainer<Uint8List>.create("thumb_right_y", "thumb_right_y"),
   };
 
+  static Map<String, VectorSignalContainer<TypedData>> vectorStorage = {
+    "dummy": VectorSignalContainer<Int32List>.create("dbcName", "displayName", Int32List(0))
+  };
+
   static void setup(){
     
   }
 
-  static void update(final String sig, final num v, final int t){
+  static void update(final String sig, final dynamic v, final int t){
     if(!storage.containsKey(sig)){
       localLogger.warning("A signal update was received for $sig but corresponding buffer was not set up", doNoti: false);
       return;
     }
-    num? last = storage[sig]!.vt.lastOrNull?.value;
-    storage[sig]!.vt.pushback(v, t);
-    storage[sig]!.everyUpdateNotifier.update();
-    if(storage[sig]!.vt.isNotEmpty && v != last){
-      storage[sig]!.changeNotifier.update();
+    if(v is num){
+      num? last = storage[sig]!.vt.lastOrNull?.value;
+      storage[sig]!.vt.pushback(v, t);
+      storage[sig]!.everyUpdateNotifier.update();
+      if(storage[sig]!.vt.isNotEmpty && v != last){
+        storage[sig]!.changeNotifier.update();
+      }
+    }
+    else if(v is TypedData){
+      vectorStorage[sig]!.value = v;
+      vectorStorage[sig]!.time = t;
+      vectorStorage[sig]!.everyUpdateNotifier.update();
+      vectorStorage[sig]!.changeNotifier.update();
     }
   }
 

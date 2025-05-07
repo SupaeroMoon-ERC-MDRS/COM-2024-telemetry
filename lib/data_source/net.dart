@@ -62,14 +62,14 @@ abstract class Net{
         final List<RecvPacket> packets = [];
         _net.getPackets(packets);
 
-        final List<MapEntry<int, Map<String, num>>> rec = [];
+        final List<MapEntry<int, Map<String, dynamic>>> rec = [];
         for(final RecvPacket pack in packets){
           rec.addAll(DBCDatabase.decode(pack.buf));
         }
 
         final int recTime = DataSource.now();
 
-        for(final MapEntry<int, Map<String, num>> msg in rec){
+        for(final MapEntry<int, Map<String, dynamic>> msg in rec){
           for(final String sig in msg.value.keys){
             DataStorage.update(sig, msg.value[sig]!, recTime);
           }

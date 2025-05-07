@@ -124,3 +124,36 @@ class SignalContainer<T extends TypedData>{
     );
   }
 }
+
+class VectorSignalContainer<T extends TypedData>{
+  final UniqueKey key = UniqueKey();
+  T value;
+  int time;
+  final String dbcName;
+  String displayName;
+  CompoundUnit unit;
+  BlankNotifier everyUpdateNotifier;
+  BlankNotifier changeNotifier;
+
+  VectorSignalContainer._({
+    required this.value,
+    required this.time,
+    required this.dbcName,
+    required this.displayName,
+    required this.unit,
+    required this.everyUpdateNotifier,
+    required this.changeNotifier
+  });
+
+  factory VectorSignalContainer.create(final String dbcName, final String displayName, final T value){
+    return VectorSignalContainer._(
+      value: value,
+      time: 0,
+      dbcName:dbcName,
+      displayName: displayName,
+      unit: CompoundUnit.scalar(), // TODO figure out from dbc
+      everyUpdateNotifier: BlankNotifier(null),
+      changeNotifier: BlankNotifier(null)
+    );
+  }
+}

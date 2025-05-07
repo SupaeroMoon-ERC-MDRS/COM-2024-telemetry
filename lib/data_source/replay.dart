@@ -11,7 +11,7 @@ abstract class Replay{
   static int pos = 0;
   static Uint8List? bytes;
   static double speed = 1;
-  static bool stop = false;
+  static bool stopReplay = false;
   static bool active = false;
   static void _setup(){
     pos = 0;
@@ -22,22 +22,19 @@ abstract class Replay{
   static void start() async{
     _setup();
 
-  
-  bytes = await Datalogger.readBytes();
-  if(bytes == null || bytes!.length <= 8) return;
+    bytes = await Datalogger.readBytes();
+    if(bytes == null || bytes!.length <= 8) return;
 
-  process();
-    
-
+    process();
   }
 
-  static void stopReplay(){
+  static void stop(){
     // cleanup
   }
 
   static void process() async{
-    if(stop == true){
-      stop = false;
+    if(stopReplay == true){
+      stopReplay = false;
       return;
     }
 
@@ -68,11 +65,8 @@ abstract class Replay{
     }
 
     active = true;    
-
     final int nexttimestamp = bytes!.buffer.asByteData().getUint32(pos + 4);
-    
     Future.delayed(Duration(milliseconds: ((nexttimestamp-timestamp) * speed).toInt()), process);
-    
   }
 
   static void seek(int timestamp){
@@ -96,7 +90,8 @@ abstract class Replay{
           return;
         }
       }
-    }else{
+    }
+    else{
       pos = 0;
       int nexttimestamp = bytes!.buffer.asByteData().getUint32(pos + 4);
       if(timestamp < nexttimestamp){
@@ -118,12 +113,7 @@ abstract class Replay{
           return;
         }
       }
-
     }
-
   }
-
-
-
 }
 

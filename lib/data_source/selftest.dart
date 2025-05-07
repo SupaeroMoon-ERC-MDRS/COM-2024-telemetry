@@ -82,6 +82,7 @@ abstract class Selftest{
       }
 
       final Uint8List bytes = DBCDatabase.encode(data);
+      //Datalogger.maybeSaveData(bytes);
 
       final List<MapEntry<int, Map<String, num>>> rec = DBCDatabase.decode(bytes);
       final int recTime = DataSource.now();

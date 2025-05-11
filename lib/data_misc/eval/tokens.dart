@@ -1,4 +1,5 @@
 import 'package:supaeromoon_ground_station/data_source/database.dart';
+import 'package:supaeromoon_ground_station/data_storage/data_storage.dart';
 import 'package:supaeromoon_ground_station/io/logger.dart';
 
 enum Op{
@@ -128,7 +129,7 @@ abstract class Tokenizer{
         else if(!readingIdent && symbol.trim().isNotEmpty){
           final String opString = symbol.trim();
           try{
-            res.add(Token.op(Op.values.firstWhere((op) => op.name == opString)));
+            res.add(Token.op(Op.values[OPERATORS.indexWhere((op) => op == opString)]));
           }
           catch(ex){
             localLogger.error("Operator $opString not recognized");
@@ -184,27 +185,41 @@ abstract class Tokenizer{
 
     // Postprocess to fix unary operators
     if(res.first.isOp == [Op.ADD, Op.SUB].contains(res.first.op)){
-      if(!res[1].isIdent){
-        localLogger.error("Syntax error at the start of the expression");
-        throw Exception();
+      if(res[1].isIdent){  
+        res[1] = Token.ident(OPERATORS[res.first.op!.index] + res[1].ident!);
+        res.removeAt(0);
       }
-
-      res[1] = Token.ident(OPERATORS[res.first.op!.index] + res[1].ident!);
-      res.removeAt(0);
+      else if(res[1].bracketOpen){
+        res[0] = Token.op(Op.MUL);
+        res.insert(0, Token.ident("-1"));
+      }
+      else{
+        localLogger.error("Syntax error at the start of the expression");
+        throw Exception();    
+      }
     }
 
-    final List<int> removeList = [];
-    for(int i = 1; i < res.length - 1; i++){
-      if(res[i].isOp && [Op.ADD, Op.SUB].contains(res[i].op) && res[i + 1].isIdent){
-        if(res[i - 1].isOp || res[i - 1].bracketOpen){
-          res[i + 1] = Token.ident(OPERATORS[res[i].op!.index] + res[i + 1].ident!);
-          removeList.add(i);
+    int i = 1;
+    while(i < res.length - 1){
+      if(res[i].isOp && [Op.ADD, Op.SUB].contains(res[i].op)){
+        if((res[i - 1].isOp || res[i - 1].bracketOpen) && res[i + 1].isIdent){
+          if(num.tryParse(res[i + 1].ident!) != null){
+            res[i + 1] = Token.ident(OPERATORS[res[i].op!.index] + res[i + 1].ident!);
+            res.removeAt(i);
+          }
+          else if(DataStorage.storage.containsKey(res[i + 1].ident!)){
+            res[i] = Token.op(Op.MUL);
+            res.insert(i, Token.ident("-1"));
+            i++;
+          }
+        }
+        else if((res[i - 1].isOp || res[i - 1].bracketOpen) && res[i + 1].bracketOpen){
+          res[i] = Token.op(Op.MUL);
+          res.insert(i, Token.ident("-1"));
+          i++;
         }
       }
-    }
-
-    for(final int r in removeList.reversed){
-      res.removeAt(r);
+      i++;
     }
 
     return res;

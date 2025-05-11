@@ -35,6 +35,6 @@ abstract class Evaluator{
   }*/
 }
 
-/*void main(){
-  final ExecTree t = Evaluator.compile("-10 > ((right_trigger + left_trigger) * (right_trigger + left_trigger))");
+/*void main(){/
+  final ExecTree t = Evaluator.compile("-10 > (-(-right_trigger + left_trigger) * (right_trigger + left_trigger))");
 }*/

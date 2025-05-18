@@ -40,6 +40,7 @@ enum Op{
 }
 
 // https://en.cppreference.com/w/cpp/language/operator_precedence
+// ignore: constant_identifier_names
 const Map<Op, int> PRECEDENCE = {
   Op.ADD : 6,
   Op.SUB : 6,
@@ -58,6 +59,69 @@ const Map<Op, int> PRECEDENCE = {
   Op.OR : 15,
   Op.BAND : 11,
   Op.BOR : 13,
+};
+
+// ignore: constant_identifier_names
+const Map<Op, bool> BOOLRES = {
+  Op.ADD : false,
+  Op.SUB : false,
+  Op.MUL : false,
+  Op.DIV : false,
+  Op.IDIV : false,
+  Op.MOD : false,
+  Op.XOR : false,
+  Op.EQ : true,
+  Op.NEQ : true,
+  Op.LT : true,
+  Op.MT : true,
+  Op.LEQ : true,
+  Op.MEQ : true,
+  Op.AND : true,
+  Op.OR : true,
+  Op.BAND : false,
+  Op.BOR : false,
+};
+
+// ignore: constant_identifier_names
+const Map<Op, bool> BOOLIN = {
+  Op.ADD : false,
+  Op.SUB : false,
+  Op.MUL : false,
+  Op.DIV : false,
+  Op.IDIV : false,
+  Op.MOD : false,
+  Op.XOR : false,
+  Op.EQ : true,
+  Op.NEQ : true,
+  Op.LT : false,
+  Op.MT : false,
+  Op.LEQ : false,
+  Op.MEQ : false,
+  Op.AND : true,
+  Op.OR : true,
+  Op.BAND : false,
+  Op.BOR : false,
+};
+
+// ignore: constant_identifier_names
+const Map<Op, bool> NUMIN = {
+  Op.ADD : true,
+  Op.SUB : true,
+  Op.MUL : true,
+  Op.DIV : true,
+  Op.IDIV : true,
+  Op.MOD : true,
+  Op.XOR : true,
+  Op.EQ : true,
+  Op.NEQ : true,
+  Op.LT : true,
+  Op.MT : true,
+  Op.LEQ : true,
+  Op.MEQ : true,
+  Op.AND : false,
+  Op.OR : false,
+  Op.BAND : true,
+  Op.BOR : true,
 };
 
 // ignore: constant_identifier_names

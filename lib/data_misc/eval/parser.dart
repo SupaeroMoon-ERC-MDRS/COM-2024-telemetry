@@ -66,7 +66,27 @@ abstract class Parser{
         continue;
       }
 
-      level.add(ExecTree(left: null, right: null, op: t.op, value: t.ident));
+      final dynamic value;
+      if(t.isIdent){
+        num? maybeNum = num.tryParse(t.ident!);
+        if(DataStorage.storage.containsKey(t.ident!)){
+          value = t.ident!;
+        }
+        else if(maybeNum != null){
+          value = maybeNum;
+        }
+        else if(["false", "true"].contains(t.ident!)){
+          value = t.ident == "false" ? false : true;
+        }
+        else{ // this in theory cannot happen just to make the compiler happy :)
+          value = null;
+        }
+      }
+      else{
+        value = null;
+      }
+
+      level.add(ExecTree(left: null, right: null, op: t.op, value: value));
       if(t.isOp){
         level.last.prec = precLevel + PRECEDENCE[level.last.op!]!;
       }

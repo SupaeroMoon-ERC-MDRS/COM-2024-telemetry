@@ -9,6 +9,7 @@ import 'package:supaeromoon_ground_station/data_source/database.dart';
 import 'package:supaeromoon_ground_station/data_source/netcode_interop.dart';
 import 'package:supaeromoon_ground_station/data_storage/data_storage.dart';
 import 'package:supaeromoon_ground_station/data_storage/session.dart';
+import 'package:supaeromoon_ground_station/data_storage/unit_system.dart';
 import 'package:supaeromoon_ground_station/io/file_system.dart';
 import 'package:supaeromoon_ground_station/io/localization.dart';
 import 'package:supaeromoon_ground_station/io/logger.dart';
@@ -32,6 +33,7 @@ abstract class LifeCycle{
         localLogger.warning("Error when loading dbc at $path");
       }
     }
+    UnitSystem.loadFromDisk();
     DataStorage.setup();
     AlarmController.load();
     VirtualSignalController.init();

@@ -26,7 +26,7 @@ class CharBuf{
 abstract class Reader{
   static bool isValidString(final String char){
     int c = char.codeUnits.first;
-    return ["_", "+", "-"].contains(char) || (c >= 97 && c <= 122 || c >= 65 && c <= 90);
+    return ["_", "+", "-", "\"", "°", "/", "%"].contains(char) || (c >= 97 && c <= 122 || c >= 65 && c <= 90) || (c >= 48 && c <= 57);
   }
 
   static bool isDigit(final String char){
@@ -275,21 +275,25 @@ const Map<ENumType, int> typeSize = {
 class DBCVectorSignal{
   final String name;
   final ENumType type;
+  final String unit;
 
   const DBCVectorSignal._({
     required this.name,
     required this.type,
+    required this.unit,
   });
 
   factory DBCVectorSignal.parse(final CharBuf buf, final int eof){
     buf.seekg(buf.tellg() + 3);
     String? name = Reader.readNextString(buf, eof);
     int? typeId = Reader.readNextNumeric(buf, eof);
+    String? unit = Reader.readNextString(buf, eof);
 
-    if(name != null && typeId != null && typeId < ENumType.values.length){
+    if(name != null && typeId != null && typeId < ENumType.values.length && unit != null){
       return DBCVectorSignal._(
         name: name,
         type: ENumType.values[typeId],
+        unit: unit.substring(1, unit.length - 1)
       );
     }
     final String msg = "Cannot parse signal at ${buf.tellg()}";
@@ -362,6 +366,7 @@ class DBCSignal{
   final num offset;
   final bool isUnsigned;
   final Endian endian;
+  final String unit;
 
   const DBCSignal._({
     required this.name,
@@ -372,6 +377,7 @@ class DBCSignal{
     required this.offset,
     required this.isUnsigned,
     required this.endian,
+    required this.unit,
   });
 
   factory DBCSignal.parse(final CharBuf buf, final int messageLen, final int eof){
@@ -384,8 +390,11 @@ class DBCSignal{
     String? sign = Reader.readNextString(buf, eof);
     num? scale = Reader.readNextFloating(buf, eof);
     num? offset = Reader.readNextFloating(buf, eof);
+    Reader.readNextFloating(buf, eof); // min
+    Reader.readNextFloating(buf, eof); // max
+    String? unit = Reader.readNextString(buf, eof);
 
-    if(name != null && shift != null && length != null && endian != null && sign != null && scale != null && offset != null){
+    if(name != null && shift != null && length != null && endian != null && sign != null && scale != null && offset != null && unit != null){
       if(shift > messageLen * 8 || shift + length > messageLen * 8){
         final String msg = "Signal position out of bounds in signal at ${buf.tellg()}";
         localLogger.warning(msg, doNoti: false);
@@ -400,12 +409,45 @@ class DBCSignal{
         scale: scale,
         offset: offset,
         isUnsigned: sign == "+",
-        endian: endian == 1 ? Endian.little : Endian.big
+        endian: endian == 1 ? Endian.little : Endian.big,
+        unit: unit.substring(1, unit.length - 1)
       );
     }
     final String msg = "Cannot parse signal at ${buf.tellg()}";
     localLogger.warning(msg, doNoti: false);
     throw Exception(msg);
+  }
+
+  ENumType getType(){
+    if((scale - scale.toInt()).abs() > 1e-5 || (offset - offset.toInt()).abs() > 1e-5){
+        return ENumType.NF32;
+    }
+
+    if(isUnsigned){
+        int critical_1 = (pow(2, length) * scale + offset).toInt();
+        int critical_2 = offset.toInt();
+
+        double bitreq = max(log(critical_1) / log(2), log(critical_2) / log(2));
+        int reqlen = (bitreq.toDouble() / 8.0).ceil() * 8;
+        
+        bool neg = scale < 0 || offset < 0;
+
+        if(reqlen == 8){
+            return neg ? ENumType.NI8 : ENumType.NU8;
+        }
+        else if(reqlen == 16){
+            return neg ? ENumType.NI16 : ENumType.NU16;
+        }
+        else if(reqlen == 32){
+            return neg ? ENumType.NI32 : ENumType.NU32;
+        }
+        else{
+            return neg ? ENumType.NI64 : ENumType.NU64;
+        }
+    }
+    else{
+        throw Exception("Signed mapping is not implemented");
+    }
   }
 
   num decode(final Bitarray messagePayloadBits){

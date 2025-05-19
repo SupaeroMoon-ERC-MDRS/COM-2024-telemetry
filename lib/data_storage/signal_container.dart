@@ -113,12 +113,12 @@ class SignalContainer<T extends TypedData>{
     required this.changeNotifier
   });
 
-  factory SignalContainer.create(final String dbcName, final String displayName){
+  factory SignalContainer.create(final String dbcName, final String displayName, final String unitStr){
     return SignalContainer._(
       vt: ValueTime<T>(0),
       dbcName:dbcName,
       displayName: displayName,
-      unit: CompoundUnit.scalar(), // TODO figure out from dbc
+      unit: CompoundUnit.fromString(unitStr),
       everyUpdateNotifier: BlankNotifier(null),
       changeNotifier: BlankNotifier(null)
     );
@@ -145,13 +145,13 @@ class VectorSignalContainer<T extends TypedData>{
     required this.changeNotifier
   });
 
-  factory VectorSignalContainer.create(final String dbcName, final String displayName, final T value){
+  factory VectorSignalContainer.create(final String dbcName, final String displayName, final T value, final String unitStr){
     return VectorSignalContainer._(
       value: value,
       time: 0,
       dbcName:dbcName,
       displayName: displayName,
-      unit: CompoundUnit.scalar(), // TODO figure out from dbc
+      unit: CompoundUnit.fromString(unitStr),
       everyUpdateNotifier: BlankNotifier(null),
       changeNotifier: BlankNotifier(null)
     );

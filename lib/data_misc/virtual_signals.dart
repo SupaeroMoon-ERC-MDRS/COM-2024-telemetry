@@ -63,7 +63,7 @@ abstract class VirtualSignalController{ // TODO temp
 
   static void init(){
     for(final _VirtualSignal sig in _signals){
-      DataStorage.storage[sig.name] = SignalContainer<Float32List>.create(sig.name, sig.name);
+      DataStorage.storage[sig.name] = SignalContainer<Float32List>.create(sig.name, sig.name, ""); // TODO unit calculation
       if(!sig.register()){
         localLogger.warning("Could not register virtual signal ${sig.name}");
       }

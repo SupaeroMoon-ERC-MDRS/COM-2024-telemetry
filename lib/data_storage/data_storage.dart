@@ -1,35 +1,81 @@
 import 'dart:typed_data';
 
+import 'package:supaeromoon_ground_station/data_source/database.dart';
 import 'package:supaeromoon_ground_station/data_storage/signal_container.dart';
+import 'package:supaeromoon_ground_station/io/localization.dart';
 import 'package:supaeromoon_ground_station/io/logger.dart';
 
 abstract class DataStorage{
-  static Map<String, SignalContainer<TypedData>> storage = {  // TODO automatically figure out in setup(), have display name as external localization instead
-    "l_top" : SignalContainer<Uint8List>.create("l_top", "l_top"),
-    "l_bottom" : SignalContainer<Uint8List>.create("l_bottom", "l_bottom"),
-    "l_right" : SignalContainer<Uint8List>.create("l_right", "l_right"),
-    "l_left" : SignalContainer<Uint8List>.create("l_left", "l_left"),
-    "r_top" : SignalContainer<Uint8List>.create("r_top", "r_top"),
-    "r_bottom" : SignalContainer<Uint8List>.create("r_bottom", "r_bottom"),
-    "r_right" : SignalContainer<Uint8List>.create("r_right", "r_right"),
-    "r_left" : SignalContainer<Uint8List>.create("r_left", "r_left"),
-    "l_shoulder" : SignalContainer<Uint8List>.create("l_shoulder", "l_shoulder"),
-    "r_shoulder" : SignalContainer<Uint8List>.create("r_shoulder", "r_shoulder"),
-    "e_stop" : SignalContainer<Uint8List>.create("e_stop", "e_stop"),
-    "left_trigger" : SignalContainer<Uint8List>.create("left_trigger", "Left trigger"),
-    "right_trigger" : SignalContainer<Uint8List>.create("right_trigger", "Right trigger"),
-    "thumb_left_x" : SignalContainer<Uint8List>.create("thumb_left_x", "thumb_left_x"),
-    "thumb_left_y" : SignalContainer<Uint8List>.create("thumb_left_y", "thumb_left_y"),
-    "thumb_right_x" : SignalContainer<Uint8List>.create("thumb_right_x", "thumb_right_x"),
-    "thumb_right_y" : SignalContainer<Uint8List>.create("thumb_right_y", "thumb_right_y"),
-  };
-
-  static Map<String, VectorSignalContainer<TypedData>> vectorStorage = {
-    "dummy": VectorSignalContainer<Int32List>.create("dbcName", "displayName", Int32List(0))
-  };
+  static Map<String, SignalContainer<TypedData>> storage = {};
+  static Map<String, VectorSignalContainer<TypedData>> vectorStorage = {};
 
   static void setup(){
-    
+    for(final DBCMessage message in DBCDatabase.messages.values){
+      for(final DBCSignal signal in message.signals.values){
+        final ENumType type = signal.getType();
+        switch (type) {
+          case ENumType.NU8:
+            storage[signal.name] = SignalContainer<Uint8List>.create(signal.name, Loc.get(signal.name), signal.unit);
+            continue;
+          case ENumType.NU16:
+            storage[signal.name] = SignalContainer<Uint16List>.create(signal.name, Loc.get(signal.name), signal.unit);
+            continue;
+          case ENumType.NU32:
+            storage[signal.name] = SignalContainer<Uint32List>.create(signal.name, Loc.get(signal.name), signal.unit);
+            continue;
+          case ENumType.NU64:
+            storage[signal.name] = SignalContainer<Uint64List>.create(signal.name, Loc.get(signal.name), signal.unit);
+            continue;
+          case ENumType.NI8:
+            storage[signal.name] = SignalContainer<Int8List>.create(signal.name, Loc.get(signal.name), signal.unit);
+            continue;
+          case ENumType.NI16:
+            storage[signal.name] = SignalContainer<Int16List>.create(signal.name, Loc.get(signal.name), signal.unit);
+            continue;
+          case ENumType.NI32:
+            storage[signal.name] = SignalContainer<Int32List>.create(signal.name, Loc.get(signal.name), signal.unit);
+            continue;
+          case ENumType.NI64:
+            storage[signal.name] = SignalContainer<Int64List>.create(signal.name, Loc.get(signal.name), signal.unit);
+            continue;
+          case ENumType.NF32:
+            storage[signal.name] = SignalContainer<Float32List>.create(signal.name, Loc.get(signal.name), signal.unit);
+            continue;
+        }
+      }
+
+      for(final DBCVectorSignal signal in message.vectorSignals){
+        switch (signal.type) {
+          case ENumType.NU8:
+            vectorStorage[signal.name] = VectorSignalContainer<Uint8List>.create(signal.name, Loc.get(signal.name), Uint8List(0), signal.unit);
+            continue;
+          case ENumType.NU16:
+            vectorStorage[signal.name] = VectorSignalContainer<Uint16List>.create(signal.name, Loc.get(signal.name), Uint16List(0), signal.unit);
+            continue;
+          case ENumType.NU32:
+            vectorStorage[signal.name] = VectorSignalContainer<Uint32List>.create(signal.name, Loc.get(signal.name), Uint32List(0), signal.unit);
+            continue;
+          case ENumType.NU64:
+            vectorStorage[signal.name] = VectorSignalContainer<Uint64List>.create(signal.name, Loc.get(signal.name), Uint64List(0), signal.unit);
+            continue;
+          case ENumType.NI8:
+            vectorStorage[signal.name] = VectorSignalContainer<Int8List>.create(signal.name, Loc.get(signal.name), Int8List(0), signal.unit);
+            continue;
+          case ENumType.NI16:
+            vectorStorage[signal.name] = VectorSignalContainer<Int16List>.create(signal.name, Loc.get(signal.name), Int16List(0), signal.unit);
+            continue;
+          case ENumType.NI32:
+            vectorStorage[signal.name] = VectorSignalContainer<Int32List>.create(signal.name, Loc.get(signal.name), Int32List(0), signal.unit);
+            continue;
+          case ENumType.NI64:
+            vectorStorage[signal.name] = VectorSignalContainer<Int64List>.create(signal.name, Loc.get(signal.name), Int64List(0), signal.unit);
+            continue;
+          case ENumType.NF32:
+            vectorStorage[signal.name] = VectorSignalContainer<Float32List>.create(signal.name, Loc.get(signal.name), Float32List(0), signal.unit);
+            continue;
+        }
+      }
+    }
   }
 
   static void update(final String sig, final dynamic v, final int t){

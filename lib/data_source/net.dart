@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:supaeromoon_ground_station/data_source/data_source.dart';
 import 'package:supaeromoon_ground_station/data_source/database.dart';
@@ -6,6 +7,9 @@ import 'package:supaeromoon_ground_station/data_source/netcode_interop.dart';
 import 'package:supaeromoon_ground_station/data_storage/data_storage.dart';
 import 'package:supaeromoon_ground_station/data_storage/session.dart';
 import 'package:supaeromoon_ground_station/io/logger.dart';
+
+const String _subnet = "10.70.";
+late final String _wlanIp;
 
 abstract class Net{
   static late NetCode _net;
@@ -21,9 +25,28 @@ abstract class Net{
     };
   }
 
-  static bool _setup(){
+  static Future<void> getWlanIp() async{
+    if(Platform.isWindows){
+      _wlanIp = "";
+    }
+    else if(Platform.isLinux){
+      ProcessResult res = await Process.run("ip", ["a"]);
+      final List<String> lines = (res.stdout as String).split('\n')
+        .map((final String e) => e.trim())
+        .where((final String e) => e.startsWith('inet '))
+        .map((final String e) => e.split(' ')[1].split('/')[0])
+        .toList();
+      
+      _wlanIp = lines.firstWhere((final String e) => e.startsWith(_subnet), orElse: () => "",);
+    }
+    else{
+      _wlanIp = "";
+    }
+  }
+
+  static Future<bool> _setup() async {
     _net = NetCode();
-    final bool success = _net.init(DBCDatabase.dbcVersion, 12123, NodeType.gs);
+    final bool success = _net.init(DBCDatabase.dbcVersion, 12123, _wlanIp, NodeType.gs);
 
     if(success){
       return true;
@@ -34,9 +57,9 @@ abstract class Net{
     }
   }
 
-  static void start(){
-    _setup();
-    _timer = Timer.periodic(const Duration(milliseconds: 1), (timer) {
+  static void start() async {
+    await _setup();
+    _timer = Timer.periodic(const Duration(milliseconds: 1), (timer) async {
       if(_net.isInitialized() && !_net.needReset()){
         if(timer.tick - _lastConnectionAttempt > 1000){ // every 1 sec TODO session
           _lastConnectionAttempt = timer.tick;
@@ -77,7 +100,7 @@ abstract class Net{
         DataStorage.discardIfOlderThan(recTime - Session.bufferMs);
       }
       else{
-        _net.reset(DBCDatabase.dbcVersion, 12123, NodeType.gs);
+        _net.reset(DBCDatabase.dbcVersion, 12123, _wlanIp, NodeType.gs);
       }
     });
   }

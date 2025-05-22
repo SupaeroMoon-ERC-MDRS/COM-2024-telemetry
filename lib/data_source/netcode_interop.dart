@@ -1,4 +1,5 @@
 import 'dart:ffi';
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:ffi/ffi.dart';
 import 'package:supaeromoon_ground_station/io/logger.dart';
@@ -65,8 +66,8 @@ typedef NetCreateCD = NetC Function();
 typedef NetDestroyC = Void Function(NetC p);
 typedef NetDestroyD = void Function(NetC p);
 
-typedef NetInitResetC = Uint32 Function(NetC p, Uint16 dbcVersion, Uint16 port, Int32 type);
-typedef NetInitResetD = int Function(NetC p, int dbcVersion, int port, int type);
+typedef NetInitResetC = Uint32 Function(NetC p, Uint16 dbcVersion, Pointer<Utf8> ip, Uint16 port, Int32 type);
+typedef NetInitResetD = int Function(NetC p, int dbcVersion, Pointer<Utf8> ip, int port, int type);
 
 typedef NetCallC = Uint32 Function(NetC p);
 typedef NetCallD = int Function(NetC p);
@@ -137,7 +138,16 @@ abstract class _NetCodeDLL{
 
   static bool initialize(){
     try{
-      final DynamicLibrary dll = DynamicLibrary.open("udpcan-net-exports.dll");
+      final DynamicLibrary dll;
+      if(Platform.isWindows){
+        dll = DynamicLibrary.open("udpcan-net-exports.dll");
+      }
+      else if(Platform.isLinux){
+        dll = DynamicLibrary.open("libudpcan-net-exports.so");
+      }
+      else{
+        exit(1);
+      }
 
       //bytesCreate = dll.lookup<NativeFunction<BytesCreateCD>>('BytesCreate').asFunction<BytesCreateCD>();
       bytesFrom = dll.lookup<NativeFunction<BytesFromC>>('BytesFrom').asFunction<BytesFromD>();
@@ -201,8 +211,8 @@ class NetCode{
     _NetCodeDLL.netDestroy(net);
   }
 
-  bool init(final int dbcVersion, final int port, final NodeType type){
-    int res = _NetCodeDLL.netInit(net, dbcVersion, port, type.index);
+  bool init(final int dbcVersion, final int port, final String ip, final NodeType type){
+    int res = _NetCodeDLL.netInit(net, dbcVersion, ip.toNativeUtf8(), port, type.index);
     if(res == 0){
       return true;
     }
@@ -210,8 +220,8 @@ class NetCode{
     return false;
   }
 
-  bool reset(final int dbcVersion, final int port, final NodeType type){
-    int res = _NetCodeDLL.netReset(net, dbcVersion, port, type.index);
+  bool reset(final int dbcVersion, final int port, final String ip, final NodeType type){
+    int res = _NetCodeDLL.netReset(net, dbcVersion, ip.toNativeUtf8(), port, type.index);
     if(res == 0){
       return true;
     }

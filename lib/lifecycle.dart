@@ -44,7 +44,7 @@ abstract class LifeCycle{
     windowManager.addListener(root);
     windowManager.setPreventClose(true);
     if(NetCode.loadDLL()){
-      DataSource.selftest();
+      DataSource.net();
     }
     else{
       localLogger.critical("Netcode loading failed, shutting down", doNoti: false);

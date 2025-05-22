@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:supaeromoon_ground_station/data_source/net.dart';
 import 'package:supaeromoon_ground_station/lifecycle.dart';
 import 'package:supaeromoon_ground_station/ui/common.dart';
 import 'package:supaeromoon_ground_station/ui/screen/main_screen.dart';
@@ -7,6 +8,7 @@ import 'package:window_manager/window_manager.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 
 void main() async {
+  await Net.getWlanIp();
   await LifeCycle.preInit();
   runApp(const App());
 

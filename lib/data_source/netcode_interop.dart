@@ -261,7 +261,7 @@ class NetCode{
         BytesC buf = _NetCodeDLL.packetGetBuf(pack);
         packets.add(
           RecvPacket(
-            buf: _NetCodeDLL.bytesData(buf).asTypedList(_NetCodeDLL.bytesSize(buf)),
+            buf: Uint8List.fromList(_NetCodeDLL.bytesData(buf).asTypedList(_NetCodeDLL.bytesSize(buf)).toList()),
             ip: _NetCodeDLL.packetGetIP(pack).toDartString(),
             port: _NetCodeDLL.packetGetPort(pack),
             type: NodeType.values[_NetCodeDLL.packetGetType(pack)]

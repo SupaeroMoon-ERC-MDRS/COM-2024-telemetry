@@ -27,7 +27,14 @@ abstract class Net{
 
   static Future<void> getWlanIp() async{
     if(Platform.isWindows){
-      _wlanIp = "";
+      ProcessResult res = await Process.run("ipconfig", ["/all"]);
+      final List<String> lines = (res.stdout as String).split('\n')
+        .map((final String e) => e.trim())
+        .where((final String e) => e.startsWith('IPv4 Address'))
+        .map((final String e) => e.split(': ')[1].split('(')[0])
+        .toList();
+      
+      _wlanIp = lines.firstWhere((final String e) => e.startsWith(_subnet), orElse: () => "",);
     }
     else if(Platform.isLinux){
       ProcessResult res = await Process.run("ip", ["a"]);

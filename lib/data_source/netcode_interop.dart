@@ -87,8 +87,8 @@ typedef NetMessageD = int Function(NetC p, BytesC message);
 typedef NetSendToC = Uint32 Function(NetC p, BytesC message, Pointer<Utf8> ip, Uint16 port);
 typedef NetSendToD = int Function(NetC p, BytesC message, Pointer<Utf8> ip, int port);
 
-typedef NetSendConnC = Uint32 Function(NetC p, Uint16 port);
-typedef NetSendConnD = int Function(NetC p, int port);
+typedef NetSendConnC = Uint32 Function(NetC p, Pointer<Utf8> ip, Uint16 port);
+typedef NetSendConnD = int Function(NetC p, Pointer<Utf8> ip, int port);
 
 typedef NetSendDiscC = Uint32 Function(NetC p, Int32 port);
 typedef NetSendDiscD = int Function(NetC p, int port);
@@ -340,8 +340,8 @@ class NetCode{
     return false;
   }
 
-  bool sendConn(final int port){
-    int res = _NetCodeDLL.netSendConn(net, port);
+  bool sendConn(final String ip, final int port){
+    int res = _NetCodeDLL.netSendConn(net, ip.toNativeUtf8(), port);
     if(res == 0){
       return true;
     }

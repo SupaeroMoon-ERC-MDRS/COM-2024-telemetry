@@ -7,6 +7,8 @@ abstract class Session{
   static List<String> dbcPaths = [];
   static int chartRefreshMs = 16;
   static int tabIndex = 0;
+  static String subnet = "192.168.43.";
+  static String raspiIp = "192.168.43.156";
 
   static void save(){
     FileSystem.trySaveMapToLocalSync(FileSystem.topDir, "SESSION", {
@@ -16,6 +18,8 @@ abstract class Session{
       "dbcPaths": dbcPaths,
       "chartRefreshMs": chartRefreshMs,
       "tabIndex": tabIndex,
+      "subnet": subnet,
+      "raspiIp": raspiIp,
     });
   }
   
@@ -44,6 +48,14 @@ abstract class Session{
 
     if(data.containsKey("tabIndex") && data["tabIndex"] is int){
       tabIndex = data["tabIndex"];
+    }
+
+    if(data.containsKey("subnet") && data["subnet"] is String){
+      subnet = data["subnet"];
+    }
+
+    if(data.containsKey("raspiIp") && data["raspiIp"] is String){
+      raspiIp = data["raspiIp"];
     }
   }
 }

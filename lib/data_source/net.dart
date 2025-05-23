@@ -8,7 +8,6 @@ import 'package:supaeromoon_ground_station/data_storage/data_storage.dart';
 import 'package:supaeromoon_ground_station/data_storage/session.dart';
 import 'package:supaeromoon_ground_station/io/logger.dart';
 
-const String _subnet = "10.70.";
 late final String _wlanIp;
 
 abstract class Net{
@@ -34,7 +33,7 @@ abstract class Net{
         .map((final String e) => e.split(': ')[1].split('(')[0])
         .toList();
       
-      _wlanIp = lines.firstWhere((final String e) => e.startsWith(_subnet), orElse: () => "",);
+      _wlanIp = lines.firstWhere((final String e) => e.startsWith(Session.subnet), orElse: () => "",);
     }
     else if(Platform.isLinux){
       ProcessResult res = await Process.run("ip", ["a"]);
@@ -44,7 +43,7 @@ abstract class Net{
         .map((final String e) => e.split(' ')[1].split('/')[0])
         .toList();
       
-      _wlanIp = lines.firstWhere((final String e) => e.startsWith(_subnet), orElse: () => "",);
+      _wlanIp = lines.firstWhere((final String e) => e.startsWith(Session.subnet), orElse: () => "",);
     }
     else{
       _wlanIp = "";
@@ -72,7 +71,7 @@ abstract class Net{
           _lastConnectionAttempt = timer.tick;
 
           if(!_net.hasPublishersType(NodeType.rover)){
-            _net.sendConn(12121);
+            _net.sendConn(Session.raspiIp, 12121);
             _hasRover = false;
           }
           else{
@@ -80,7 +79,7 @@ abstract class Net{
           }
 
           if(!_net.hasPublishersType(NodeType.remote)){
-            _net.sendConn(12122);
+            _net.sendConn("", 12122);
             _hasRemote = false;
           }
           else{

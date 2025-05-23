@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supaeromoon_ground_station/data_misc/notifiers.dart';
+import 'package:supaeromoon_ground_station/ui/tabs/tab_settings.dart';
 import 'package:supaeromoon_ground_station/ui/tabs/tmp.dart';
 import 'package:supaeromoon_ground_station/ui/theme.dart';
 
@@ -12,10 +13,11 @@ class TabEntry{
 }
 
 class TabTreeController{
-  final List<TabEntry> tree = const [
-    TabEntry(name: "Dummy1", icon: Icons.tab, tree: dummyTab1),
-    TabEntry(name: "Dummy2", icon: Icons.tab, tree: dummyTab2),
-    TabEntry(name: "Dummy3", icon: Icons.tab, tree: dummyTab3),
+  final List<TabEntry> tree = [
+    TabEntry(name: "Settings", icon: Icons.settings, tree: settingsTab),
+    const TabEntry(name: "Dummy1", icon: Icons.tab, tree: dummyTab1),
+    const TabEntry(name: "Dummy2", icon: Icons.tab, tree: dummyTab2),
+    const TabEntry(name: "Dummy3", icon: Icons.tab, tree: dummyTab3),
   ];
   final BlankNotifier notifier = BlankNotifier(null);
   int index;

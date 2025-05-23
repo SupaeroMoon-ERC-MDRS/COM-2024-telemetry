@@ -600,7 +600,7 @@ abstract class DBCDatabase{
       }
       catch(exc){
         if(messages.isEmpty){
-          rethrow;
+          return false;
         }
         return true;
       }

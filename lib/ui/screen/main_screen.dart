@@ -1,5 +1,6 @@
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
+import 'package:supaeromoon_ground_station/data_source/data_source.dart';
 import 'package:supaeromoon_ground_station/data_storage/session.dart';
 import 'package:supaeromoon_ground_station/io/localization.dart';
 import 'package:supaeromoon_ground_station/lifecycle.dart';
@@ -92,6 +93,27 @@ class TopMenu extends StatelessWidget {
                 ),
               ),
             )
+          ),
+          SizedBox(
+            width: 300,
+            child: SlidingSwitch(
+              controller: SlidingSwitchController(
+                items: ["Selftest", "Network", "Replay"],
+                names: ["Selftest", "Network", "Replay"],
+                onChanged:(final int sel) {
+                  if(sel == 0){
+                    DataSource.selftest();
+                  }
+                  else if(sel == 1){
+                    DataSource.net();
+                  }
+                  else{
+                    DataSource.replay();
+                  }
+                },
+                active: ["Selftest", "Network", "Replay"][DataSource.isMode(DataSourceMode.selftest) ? 0 : DataSource.isMode(DataSourceMode.net) ? 1 : 2]
+              )
+            ),
           ),
           IconButton(
             onPressed: (){

@@ -1,35 +1,25 @@
-// Input: string of c++ like code
-//      operators for now: +-*/ with &|^ and ()brackets
-//      in future functions like abs() etc
-//      allow numeric constants
-
-// Parsing: tokenize -> create op tree based on op precedence and brackets
-//      then create gettable input list (not map)
-
-// Exec: give input list to exec that runs bottom up on op tree
-//      return value/failresult
-
 import 'dart:typed_data';
 
+import 'package:supaeromoon_ground_station/data_misc/eval/eval.dart';
 import 'package:supaeromoon_ground_station/data_source/data_source.dart';
 import 'package:supaeromoon_ground_station/data_storage/data_storage.dart';
 import 'package:supaeromoon_ground_station/data_storage/signal_container.dart';
+import 'package:supaeromoon_ground_station/io/file_system.dart';
 import 'package:supaeromoon_ground_station/io/logger.dart';
+import 'package:supaeromoon_ground_station/io/serdes.dart';
 
-class _VirtualSignal{
-  final num Function(List<num>) rule;
+class VirtualSignal{
   final String name;
-  final List<String> inputs;
+  final String expr;
+  final ExecTree exec;
+  final List<String> inputs = [];
 
-  const _VirtualSignal({required this.name, required this.inputs, required this.rule});
-
-  void _tick(){
-    try{
-      final num value = rule(inputs.map((signal) => DataStorage.storage[signal]!.vt.lastOrNull!.value).toList());
-      DataStorage.update(name, value, DataSource.now());
-    }catch(ex){
-      return;
-    }
+  VirtualSignal._({
+    required this.name,
+    required this.expr,
+    required this.exec
+  }){
+    inputs.addAll(Evaluator.requiredSignals(exec));
   }
 
   bool register(){
@@ -52,17 +42,51 @@ class _VirtualSignal{
       }
     }
   }
+
+  void _tick(){
+    try{
+      final num value = Evaluator.eval<num>(exec);
+      DataStorage.update(name, value, DataSource.now());
+    }catch(ex){
+      return;
+    }
+  }
+
+  Map get asMap => {
+    "name": name,
+    "expr": expr,
+  };
+
+  factory VirtualSignal.fromMap(final Map map){
+    return VirtualSignal._(name: map["name"], expr: map["expr"], exec: Evaluator.compile<num>(map["expr"]));
+  }
 }
 
-abstract class VirtualSignalController{ // TODO temp
-  static final List<_VirtualSignal> _signals = [
-    _VirtualSignal(name: "test", inputs: ["left_trigger", "right_trigger"], rule: (final List<num> v){
-      return v[0] + v[1];
-    }),
-  ];
+abstract class VirtualSignalController{
+  static final List<VirtualSignal> _virtualSignals = [];
 
-  static void init(){
-    for(final _VirtualSignal sig in _signals){
+  static void load(){
+    final List<Map> ser;
+    try{
+      ser = SerDes.jsonFromBytes(
+        FileSystem.tryLoadBytesFromLocalSync(FileSystem.topDir, "VIRTUALSIGNALS")
+      ) as List<Map>;
+    }catch(ex){
+      localLogger.error("Failed to load virtual signals: ${ex.toString()}");
+      return;
+    }
+
+    _virtualSignals.addAll(ser.map((e){
+      try{
+        return VirtualSignal.fromMap(e);
+      }catch(ex){
+        localLogger.error("Failed to parse alarm: ${ex.toString()}");
+        return VirtualSignal._(name: "NOSIG", expr: "", exec: ExecTree.empty());
+      }
+    }));
+    _virtualSignals.removeWhere((alarm) => alarm.name == "NOSIG");
+
+    for(final VirtualSignal sig in _virtualSignals){
       DataStorage.storage[sig.name] = SignalContainer<Float32List>.create(sig.name, sig.name, ""); // TODO unit calculation
       if(!sig.register()){
         localLogger.warning("Could not register virtual signal ${sig.name}");
@@ -70,9 +94,17 @@ abstract class VirtualSignalController{ // TODO temp
     }
   }
 
-  static void stop(){    
-    for(final _VirtualSignal sig in _signals){
-      sig.deregister();
-    }
+  static void add(final VirtualSignal alarm){
+    _virtualSignals.add(alarm..register());
+  }
+
+  static void remove(final int index){
+    _virtualSignals.removeAt(index).deregister();
+  }
+
+  static void save(){
+    FileSystem.trySaveBytesToLocalAsync(FileSystem.topDir, "VIRTUALSIGNALS", 
+      SerDes.jsonToBytes(_virtualSignals.map((e) => e.asMap).toList())
+    );
   }
 }

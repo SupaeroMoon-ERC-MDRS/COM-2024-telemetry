@@ -1,50 +1,51 @@
+import 'package:supaeromoon_ground_station/data_misc/eval/eval.dart';
 import 'package:supaeromoon_ground_station/data_storage/data_storage.dart';
 import 'package:supaeromoon_ground_station/io/file_system.dart';
 import 'package:supaeromoon_ground_station/io/logger.dart';
 import 'package:supaeromoon_ground_station/io/serdes.dart';
 
 class Alarm{
-  final String signal;
-  final bool inRange;
-  final num min;
-  final num max;
-  late final bool Function(num) condition;
+  final String name;
+  final String expr;
   final bool active;
+  final ExecTree exec;
   bool triggered = false;
+  final List<String> requiredSignals = [];
 
-  Alarm({
-    required this.signal,
+  Alarm._({
+    required this.name,
     required this.active,
-    required this.inRange,
-    required this.min,
-    required this.max,
+    required this.expr,
+    required this.exec
   }){
-    condition = inRange ? 
-      (final num value) {
-        return min <= value && value <= max;
-      }
-      :
-      (final num value) {
-        return min >= value || value >= max;
-      };
+    requiredSignals.addAll(Evaluator.requiredSignals(exec));
   }
 
   bool get canTrigger => active & !triggered;
 
-  void register(){
-    if(DataStorage.storage.containsKey(signal)){
-      DataStorage.storage[signal]!.changeNotifier.addListener(_check);
+  bool register(){
+    for(final String signal in requiredSignals){
+      if(DataStorage.storage.containsKey(signal)){
+        DataStorage.storage[signal]!.changeNotifier.addListener(_check);
+      }
+      else{
+        deregister();
+        return false;
+      }
     }
+    return true;
   }
 
   void deregister(){
-    if(DataStorage.storage.containsKey(signal)){
-      DataStorage.storage[signal]!.changeNotifier.removeListener(_check);
+    for(final String signal in requiredSignals){
+      if(DataStorage.storage.containsKey(signal)){
+        DataStorage.storage[signal]!.changeNotifier.removeListener(_check);
+      }
     }
   }
 
   void _check(){
-    if(active && DataStorage.storage[signal]!.vt.isNotEmpty && condition(DataStorage.storage[signal]!.vt.lastOrNull!.value)){
+    if(canTrigger && requiredSignals.every((final String signal) => DataStorage.storage[signal]!.vt.isNotEmpty) && Evaluator.eval<bool>(exec)){
       triggered = true;
       // TODO play sound
       // TODO do notif
@@ -52,21 +53,18 @@ class Alarm{
   }
 
   Map get asMap => {
-    "signal": signal,
-    "inRange": inRange,
-    "min": min,
-    "max": max,
+    "name": name,
+    "expr": expr,
     "active": active
   };
 
   factory Alarm.fromMap(final Map map){
-    return Alarm(signal: map["signal"], active: map["active"], inRange: map["inRange"], min: map["min"], max: map["max"]);
+    return Alarm._(name: map["name"], active: map["active"], expr: map["expr"], exec: Evaluator.compile<bool>(map["expr"]));
   }
 }
 
 abstract class AlarmController{
   static final List<Alarm> _alarms = [];
-  static final Map<String, List<int>> _nameIdMap = {};
 
   static List<Alarm> get alarms => _alarms;
 
@@ -86,10 +84,10 @@ abstract class AlarmController{
         return Alarm.fromMap(e);
       }catch(ex){
         localLogger.error("Failed to parse alarm: ${ex.toString()}");
-        return Alarm(signal: "NOSIG", active: false, inRange: false, min: 0, max: 0);
+        return Alarm._(name: "NOSIG", expr: "", active: false, exec: ExecTree.empty());
       }
     }));
-    _alarms.removeWhere((alarm) => alarm.signal == "NOSIG");
+    _alarms.removeWhere((alarm) => alarm.name == "NOSIG");
 
     for(final Alarm alarm in _alarms){
       alarm.register();
@@ -97,25 +95,11 @@ abstract class AlarmController{
   }
 
   static void add(final Alarm alarm){
-    if(!_nameIdMap.containsKey(alarm.signal)){
-      _nameIdMap[alarm.signal] = [];
-    }
-
-    _nameIdMap[alarm.signal]!.add(_alarms.length);
     _alarms.add(alarm..register());
   }
 
   static void remove(final int index){
-    _nameIdMap[_alarms[index].signal]!.remove(index);
-    alarms.removeAt(index).deregister();
-
-    for(final String sig in _nameIdMap.keys){
-      for(int i = 0; i < _nameIdMap[sig]!.length; i++){
-        if(_nameIdMap[sig]![i] > index){
-          _nameIdMap[sig]![i]--;
-        }
-      }
-    }
+    _alarms.removeAt(index).deregister();
   }
 
   static void save(){

@@ -151,6 +151,20 @@ abstract class Evaluator{
   static T eval<T>(final ExecTree exec){
     return _traverseReturn(exec, _execVisitor) as T;
   }
+
+  static List<String> requiredSignals(final ExecTree exec){
+    final Set<String> signals = {};
+
+    signalVisitor(final ExecTree node){
+      if(node.value is String){
+        signals.add(node.value);
+      }
+      return true;
+    }
+
+    _traverse(exec, signalVisitor);
+    return signals.toList();
+  }
 }
 
 /*void main(){

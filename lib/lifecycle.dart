@@ -36,7 +36,7 @@ abstract class LifeCycle{
     UnitSystem.loadFromDisk();
     DataStorage.setup();
     AlarmController.load();
-    VirtualSignalController.init();
+    VirtualSignalController.load();
   }
 
   static void postInit(WindowListener root){
@@ -57,7 +57,7 @@ abstract class LifeCycle{
     Session.save();
     await localLogger.stop();
     AlarmController.save();
-    VirtualSignalController.stop();
+    VirtualSignalController.save();
     exit(0);
   }
 }

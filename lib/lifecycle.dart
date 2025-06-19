@@ -25,6 +25,7 @@ abstract class LifeCycle{
     Session.load();
     Loc.load();
     Loc.setLanguage("en-EN");
+    UnitSystem.loadFromDisk();
     for(final String path in Session.dbcPaths){
       if(DBCDatabase.parse(path)){
         localLogger.info("Successfully loaded dbc at $path");
@@ -33,7 +34,6 @@ abstract class LifeCycle{
         localLogger.warning("Error when loading dbc at $path");
       }
     }
-    UnitSystem.loadFromDisk();
     DataStorage.setup();
     AlarmController.load();
     VirtualSignalController.load();
@@ -55,9 +55,9 @@ abstract class LifeCycle{
   static Future<void> shutdown() async {
     DataSource.stop();
     Session.save();
-    await localLogger.stop();
     AlarmController.save();
     VirtualSignalController.save();
+    await localLogger.stop();
     exit(0);
   }
 }

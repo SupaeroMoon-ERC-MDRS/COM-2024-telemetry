@@ -5,49 +5,52 @@ import 'package:supaeromoon_ground_station/data_source/database.dart';
 import 'package:supaeromoon_ground_station/data_storage/data_storage.dart';
 import 'package:supaeromoon_ground_station/data_storage/session.dart';
 
-
-
 abstract class Replay{
-  static int pos = 0;
-  static Uint8List? bytes;
+  static int _pos = 0;
+  static Uint8List? _bytes;
   static double speed = 1;
-  static bool stopReplay = false;
-  static bool active = false;
-  static void _setup(){
-    pos = 0;
+  static bool _stopReplay = false;
+  static bool _active = false;
 
-    //First time setup, run once
+  static Future<void> _setup() async {
+    _pos = 0;
+    _bytes = await Datalogger.readBytes();
   }
 
-  static void start() async{
-    _setup();
+  static void start() async {
+    await _setup();
 
-    bytes = await Datalogger.readBytes();
-    if(bytes == null || bytes!.length <= 8) return;
+    if(_bytes == null || _bytes!.length <= 8) return;
 
-    process();
+    _process();
   }
 
   static void stop(){
-    // cleanup
+    _stopReplay = true;
+    _bytes?.clear();
   }
 
-  static void process() async{
-    if(stopReplay == true){
-      stopReplay = false;
+  static void pause() => _stopReplay = true;
+  static void resume(){
+    if(_active) _process();
+  }
+
+  static void _process() async{
+    if(_stopReplay == true){
+      _stopReplay = false;
       return;
     }
 
-    final int len = bytes!.buffer.asByteData().getUint32(pos);
-    pos += 4;
-    final int timestamp = bytes!.buffer.asByteData().getUint32(pos);
-    pos += 4;
-    if(bytes!.length <= pos + len){
-      active = false;
+    final int len = _bytes!.buffer.asByteData().getUint32(_pos);
+    _pos += 4;
+    final int timestamp = _bytes!.buffer.asByteData().getUint32(_pos);
+    _pos += 4;
+    if(_bytes!.length <= _pos + len){
+      _active = false;
       return;
     }
-    Uint8List line = bytes!.sublist(pos, pos + len);
-    pos += len;
+    Uint8List line = _bytes!.sublist(_pos, _pos + len);
+    _pos += len;
 
     final List<MapEntry<int, Map<String, dynamic>>> rec = DBCDatabase.decode(line);
 
@@ -59,57 +62,57 @@ abstract class Replay{
     
     DataStorage.discardIfOlderThan(timestamp - Session.bufferMs);
 
-    if(bytes!.length <= pos + 8){
-      active = false;
+    if(_bytes!.length <= _pos + 8){
+      _active = false;
       return;
     }
 
-    active = true;    
-    final int nexttimestamp = bytes!.buffer.asByteData().getUint32(pos + 4);
-    Future.delayed(Duration(milliseconds: ((nexttimestamp-timestamp) * speed).toInt()), process);
+    _active = true;    
+    final int nexttimestamp = _bytes!.buffer.asByteData().getUint32(_pos + 4);
+    Future.delayed(Duration(milliseconds: ((nexttimestamp - timestamp) * speed).toInt()), _process);
   }
 
   static void seek(int timestamp){
-    if(active == false) return;
-    int initialpos = pos;
+    if(_active == false) return;
+    int initialpos = _pos;
 
-    final int nexttimestamp = bytes!.buffer.asByteData().getUint32(pos + 4);
+    final int nexttimestamp = _bytes!.buffer.asByteData().getUint32(_pos + 4);
     if(timestamp > nexttimestamp){
       while(timestamp > nexttimestamp){
-        if(bytes!.length < pos + 8){
-          pos = initialpos;
+        if(_bytes!.length < _pos + 8){
+          _pos = initialpos;
           return;
         }
-        final int len = bytes!.buffer.asByteData().getUint32(pos);
-        pos += 4;
-        final int nexttimestamp = bytes!.buffer.asByteData().getUint32(pos);
-        pos += 4 + len;
+        final int len = _bytes!.buffer.asByteData().getUint32(_pos);
+        _pos += 4;
+        final int nexttimestamp = _bytes!.buffer.asByteData().getUint32(_pos);
+        _pos += 4 + len;
 
         if(timestamp < nexttimestamp){
-          pos -= len + 8;
+          _pos -= len + 8;
           return;
         }
       }
     }
     else{
-      pos = 0;
-      int nexttimestamp = bytes!.buffer.asByteData().getUint32(pos + 4);
+      _pos = 0;
+      int nexttimestamp = _bytes!.buffer.asByteData().getUint32(_pos + 4);
       if(timestamp < nexttimestamp){
-        pos = initialpos;
+        _pos = initialpos;
         return;
       }
       while(timestamp > nexttimestamp){
-        if(bytes!.length < pos + 8){
-          pos = initialpos;
+        if(_bytes!.length < _pos + 8){
+          _pos = initialpos;
           return;
         }
-        final int len = bytes!.buffer.asByteData().getUint32(pos);
-        pos += 4;
-        final int nexttimestamp = bytes!.buffer.asByteData().getUint32(pos);
-        pos += 4 + len;
+        final int len = _bytes!.buffer.asByteData().getUint32(_pos);
+        _pos += 4;
+        final int nexttimestamp = _bytes!.buffer.asByteData().getUint32(_pos);
+        _pos += 4 + len;
 
         if(timestamp < nexttimestamp){
-          pos -= len + 8;
+          _pos -= len + 8;
           return;
         }
       }

@@ -6,12 +6,12 @@ import 'package:supaeromoon_ground_station/io/logger.dart';
 
 abstract class Datalogger{
   static String? _recordPath;
-  static int logStartTime = 0;
-  static bool hookEnabled = false;
+  static int _logStartTime = 0;
+  static bool _hookEnabled = false;
 
   static bool get isSetup => _recordPath != null;
-
   static String? get getRecordPath => _recordPath;
+
   static bool setRecordPath(final String recordPath, [final bool autoDiscard = false]){
     final File file = File(recordPath);
 
@@ -27,11 +27,12 @@ abstract class Datalogger{
     else{
       file.createSync();
     }
+
     _recordPath = recordPath;
     return true;
   }
 
-  static Future<bool> writeBytes(final Uint8List bytes) async {
+  static Future<bool> _writeBytes(final Uint8List bytes) async {
     if(_recordPath == null){
       return false;
     }
@@ -53,7 +54,7 @@ abstract class Datalogger{
       return null;
     }
 
-    final file = File(_recordPath!);
+    final File file = File(_recordPath!);
     file.open(mode: FileMode.read);
 
     if(await file.exists()){
@@ -65,7 +66,7 @@ abstract class Datalogger{
     }
   }
 
-  static Uint8List createBuffer(int timestamp, Uint8List buffer){
+  static Uint8List _createBuffer(int timestamp, Uint8List buffer){
     Uint8List header = Uint8List(4 + 4);
     header.buffer.asByteData().setUint32(0, buffer.length);
     header.buffer.asByteData().setUint32(4, timestamp);
@@ -73,31 +74,23 @@ abstract class Datalogger{
     return Uint8List.fromList([...header, ...buffer]);
   }
 
-  static void maybeSaveData(final Uint8List bytes, int logStartTime){
-    // if hook enabled
-    // then createBuffer and save into file
-    
-    if(hookEnabled){
-      int timestamp = DateTime.now().millisecondsSinceEpoch - logStartTime;
-      (createBuffer(timestamp, bytes));
+  static void maybeSaveData(final Uint8List bytes, int timestamp){    
+    if(_hookEnabled){
+      int ts = timestamp - _logStartTime;
+      _writeBytes(_createBuffer(ts, bytes));
     }
   }
 
   static void startLogger(){
-    // open file
-    //final file = File('log.bin');
-    _recordPath = 'log.bin';
-    logStartTime = DateTime.now().millisecondsSinceEpoch;
-    // enable hook in network code
-    if(!hookEnabled){
-      hookEnabled = true;
+    _logStartTime = DateTime.now().millisecondsSinceEpoch;
+
+    if(_recordPath != null && !setRecordPath(_recordPath!)){
+      localLogger.warning("Log file not specified, or already exists");
+      return;
     }
+
+    _hookEnabled = true;
   }
 
-  static void stopLogger(){
-    // disable hook
-    if(hookEnabled){
-      hookEnabled = false;
-    }
-  }
+  static void stopLogger() => _hookEnabled = false;
 }

@@ -11,6 +11,7 @@ abstract class Replay{
   static double speed = 1;
   static bool _stopReplay = false;
   static bool _active = false;
+  static int? replayTime;
 
   static Future<void> _setup() async {
     _pos = 0;
@@ -22,13 +23,11 @@ abstract class Replay{
 
     if(_bytes == null || _bytes!.length <= 8) return;
 
+    _stopReplay = false;
     _process();
   }
 
-  static void stop(){
-    _stopReplay = true;
-    _bytes?.clear();
-  }
+  static void stop() => _stopReplay = true;
 
   static void pause() => _stopReplay = true;
   static void resume(){
@@ -59,6 +58,8 @@ abstract class Replay{
         DataStorage.update(sig, msg.value[sig]!, timestamp);
       }
     }
+
+    replayTime = timestamp;
     
     DataStorage.discardIfOlderThan(timestamp - Session.bufferMs);
 

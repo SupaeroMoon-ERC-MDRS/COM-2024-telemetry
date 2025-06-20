@@ -1,6 +1,7 @@
 import 'package:supaeromoon_ground_station/data_source/net.dart';
 import 'package:supaeromoon_ground_station/data_source/replay.dart';
 import 'package:supaeromoon_ground_station/data_source/selftest.dart';
+import 'package:supaeromoon_ground_station/data_storage/data_storage.dart';
 
 enum DataSourceMode{
   none,
@@ -14,7 +15,7 @@ abstract class DataSource{
 
   static int now(){
     if(_mode == DataSourceMode.replay){
-      return 0;  // replay time
+      return Replay.replayTime ?? 0;
     }
     return DateTime.now().millisecondsSinceEpoch;
   }
@@ -29,6 +30,8 @@ abstract class DataSource{
     else if(_mode == DataSourceMode.selftest){
       Selftest.stop();
     }
+
+    DataStorage.clear();
 
     Net.start();
     _mode = DataSourceMode.net;
@@ -45,6 +48,8 @@ abstract class DataSource{
       Selftest.stop();
     }
 
+    DataStorage.clear();
+
     Replay.start();
     _mode = DataSourceMode.replay;
   }
@@ -60,6 +65,8 @@ abstract class DataSource{
       Replay.stop();
     }
 
+    DataStorage.clear();
+
     Selftest.start();
     _mode = DataSourceMode.selftest;
   }
@@ -74,6 +81,9 @@ abstract class DataSource{
     else if(_mode == DataSourceMode.selftest){
       Selftest.stop();
     }
+
+    DataStorage.clear();
+
     _mode = DataSourceMode.none;
   }
 

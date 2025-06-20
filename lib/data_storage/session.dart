@@ -7,6 +7,8 @@ abstract class Session{
   static int tabIndex = 0;
   static String subnet = "192.168.43.";
   static String raspiIp = "192.168.43.156";
+  static String logSavePath = "log.bin";
+  static String logReadPath = "log.bin";
 
   static void save(){
     FileSystem.trySaveMapToLocalSync(FileSystem.topDir, "SESSION", {
@@ -16,6 +18,8 @@ abstract class Session{
       "tabIndex": tabIndex,
       "subnet": subnet,
       "raspiIp": raspiIp,
+      "logSavePath": logSavePath,
+      "logReadPath": logReadPath,
     });
   }
   
@@ -44,6 +48,14 @@ abstract class Session{
 
     if(data.containsKey("raspiIp") && data["raspiIp"] is String){
       raspiIp = data["raspiIp"];
+    }
+
+    if(data.containsKey("logSavePath") && data["logSavePath"] is String){
+      logSavePath = data["logSavePath"];
+    }
+    
+    if(data.containsKey("logReadPath") && data["logReadPath"] is String){
+      logReadPath = data["logReadPath"];
     }
   }
 }

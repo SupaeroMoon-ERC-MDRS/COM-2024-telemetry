@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:supaeromoon_ground_station/data_misc/datalogger.dart';
 import 'package:supaeromoon_ground_station/data_source/data_source.dart';
 import 'package:supaeromoon_ground_station/data_source/database.dart';
 import 'package:supaeromoon_ground_station/data_storage/data_storage.dart';
@@ -82,10 +83,10 @@ abstract class Selftest{
       }
 
       final Uint8List bytes = DBCDatabase.encode(data);
-      //Datalogger.maybeSaveData(bytes);
 
       final List<MapEntry<int, Map<String, dynamic>>> rec = DBCDatabase.decode(bytes);
       final int recTime = DataSource.now();
+      Datalogger.maybeSaveData(bytes, recTime);
 
       for(final MapEntry<int, Map<String, dynamic>> msg in rec){
         for(final String sig in msg.value.keys){

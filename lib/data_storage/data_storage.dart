@@ -78,6 +78,47 @@ abstract class DataStorage{
     }
   }
 
+  static void clear(){
+    for(final DBCMessage message in DBCDatabase.messages.values){
+      for(final DBCSignal signal in message.signals.values){
+        storage[signal.name]!.vt.clear();
+      }
+
+      for(final DBCVectorSignal signal in message.vectorSignals){
+        vectorStorage[signal.name]!.time = 0;
+        switch (signal.type) {
+          case ENumType.NU8:
+            vectorStorage[signal.name]!.value = Uint8List(0);
+            continue;
+          case ENumType.NU16:
+            vectorStorage[signal.name]!.value = Uint16List(0);
+            continue;
+          case ENumType.NU32:
+            vectorStorage[signal.name]!.value = Uint32List(0);
+            continue;
+          case ENumType.NU64:
+            vectorStorage[signal.name]!.value = Uint64List(0);
+            continue;
+          case ENumType.NI8:
+            vectorStorage[signal.name]!.value = Int8List(0);
+            continue;
+          case ENumType.NI16:
+            vectorStorage[signal.name]!.value = Int16List(0);
+            continue;
+          case ENumType.NI32:
+            vectorStorage[signal.name]!.value = Int32List(0);
+            continue;
+          case ENumType.NI64:
+            vectorStorage[signal.name]!.value = Int64List(0);
+            continue;
+          case ENumType.NF32:
+            vectorStorage[signal.name]!.value = Float32List(0);
+            continue;
+        }
+      }
+    }
+  }
+
   static void update(final String sig, final dynamic v, final int t){
     if(!storage.containsKey(sig)){
       localLogger.warning("A signal update was received for $sig but corresponding buffer was not set up", doNoti: false);
@@ -146,6 +187,9 @@ abstract class DataStorage{
       }
     }
     // nearest
+    if(searchIndex == -1){
+      return 0;
+    }
     return searchIndex.toInt();
     }
 }

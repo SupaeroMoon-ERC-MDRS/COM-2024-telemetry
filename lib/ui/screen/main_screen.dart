@@ -1,5 +1,6 @@
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
+import 'package:supaeromoon_ground_station/data_misc/datalogger.dart';
 import 'package:supaeromoon_ground_station/data_source/data_source.dart';
 import 'package:supaeromoon_ground_station/data_storage/session.dart';
 import 'package:supaeromoon_ground_station/io/localization.dart';
@@ -115,6 +116,7 @@ class TopMenu extends StatelessWidget {
               )
             ),
           ),
+          const DataloggerControl(),
           IconButton(
             onPressed: (){
               ThemeManager.changeStyle(ThemeManager.activeStyle == "DARK" ? "BRIGHT" : "DARK");
@@ -140,6 +142,29 @@ class TopMenu extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class DataloggerControl extends StatefulWidget {
+  const DataloggerControl({super.key});
+
+  @override
+  State<DataloggerControl> createState() => _DataloggerControlState();
+}
+
+class _DataloggerControlState extends State<DataloggerControl> {
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      onPressed: (){
+        Datalogger.isRunning ? Datalogger.stopLogger() : Datalogger.startLogger();
+        setState(() {});
+      },
+      iconSize: ThemeManager.globalStyle.subTitleFontSize + 6,
+      padding: EdgeInsets.zero,
+      splashColor: Colors.grey,
+      icon: Icon(Datalogger.isRunning ? Icons.close : Icons.receipt)
     );
   }
 }

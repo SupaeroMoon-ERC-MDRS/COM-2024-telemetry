@@ -67,15 +67,45 @@ List<Widget> _settingsPanelTopLeft = [
   ),
 ];
 
+List<Widget> _settingsPanelLogReplay = [
+  InTextField(
+    label: "Log save path",
+    tooltip: "",
+    getInitialValue: () => Session.logSavePath,
+    onEditingComplete: (final String newValue){
+      Session.logSavePath = newValue;
+      return Session.logSavePath;
+    }
+  ),
+  InTextField(
+    label: "Log replay path",
+    tooltip: "",
+    getInitialValue: () => Session.logReadPath,
+    onEditingComplete: (final String newValue){
+      Session.logReadPath = newValue;
+      return Session.logReadPath;
+    }
+  ),
+];
+
 List<Widget> settingsTab = [
   Row(
     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Panel(
-        colsize: 4,
-        size: Size(400 + 2 * ThemeManager.globalStyle.padding, 30 * 4 + 2 * ThemeManager.globalStyle.padding),
-        widgets: _settingsPanelTopLeft
+      Column(
+        children: [
+          Panel(
+            colsize: 4,
+            size: Size(400 + 2 * ThemeManager.globalStyle.padding, 30 * 4 + 2 * ThemeManager.globalStyle.padding),
+            widgets: _settingsPanelTopLeft
+          ),
+          Panel(
+            colsize: 2,
+            size: Size(400 + 2 * ThemeManager.globalStyle.padding, 30 * 2 + 2 * ThemeManager.globalStyle.padding),
+            widgets: _settingsPanelLogReplay
+          ),
+        ],
       ),
       Panel(
         colsize: 1,

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:supaeromoon_ground_station/data_misc/datalogger.dart';
 import 'package:supaeromoon_ground_station/data_source/data_source.dart';
 import 'package:supaeromoon_ground_station/data_source/database.dart';
 import 'package:supaeromoon_ground_station/data_source/netcode_interop.dart';
@@ -91,12 +92,13 @@ abstract class Net{
         final List<RecvPacket> packets = [];
         _net.getPackets(packets);
 
+        final int recTime = DataSource.now();
         final List<MapEntry<int, Map<String, dynamic>>> rec = [];
         for(final RecvPacket pack in packets){
           rec.addAll(DBCDatabase.decode(pack.buf));
+          Datalogger.maybeSaveData(pack.buf, recTime);
         }
 
-        final int recTime = DataSource.now();
 
         for(final MapEntry<int, Map<String, dynamic>> msg in rec){
           for(final String sig in msg.value.keys){

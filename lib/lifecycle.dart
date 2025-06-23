@@ -25,7 +25,7 @@ abstract class LifeCycle{
     Session.load();
     Loc.load();
     Loc.setLanguage("en-EN");
-    UnitSystem.loadFromDisk();
+    await UnitSystem.loadFromDisk();
     for(final String path in Session.dbcPaths){
       if(DBCDatabase.parse(path)){
         localLogger.info("Successfully loaded dbc at $path");
@@ -44,7 +44,7 @@ abstract class LifeCycle{
     windowManager.addListener(root);
     windowManager.setPreventClose(true);
     if(NetCode.loadDLL()){
-      DataSource.net();
+      DataSource.selftest();
     }
     else{
       localLogger.critical("Netcode loading failed, shutting down", doNoti: false);

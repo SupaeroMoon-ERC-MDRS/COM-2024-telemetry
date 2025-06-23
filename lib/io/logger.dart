@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:supaeromoon_ground_station/notifications/notification_logic.dart';
+
 const String mainLogPath = "./Logs/GS.log";
 Logger localLogger = Logger(mainLogPath, "Initial Logger");
 
@@ -128,7 +130,7 @@ class Logger{
     _buffer.add(entry);
     __wake();
     if(doNoti){
-      //NotificationController.add(Notification(entry: entry, durationMs: 10000, isDecaying: entry.level.index <= 1));
+      NotificationController.add(Notification(entry: entry, durationMs: 10000, isDecaying: entry.level.index <= 1));
     }
   }
 

@@ -39,7 +39,7 @@ abstract class Datalogger{
       return true;
     }
     else{
-      localLogger.warning("Datalogger file does not exist at ${Session.logSavePath}", doNoti: false);
+      localLogger.warning("Datalogger file does not exist at ${Session.logSavePath}");
       return false;
     }
   }
@@ -51,7 +51,7 @@ abstract class Datalogger{
       return await file.readAsBytes();
     }
     else{
-      localLogger.warning("Datalogger file does not exist at ${Session.logReadPath}", doNoti: false);
+      localLogger.warning("Datalogger file does not exist at ${Session.logReadPath}");
       return null;
     }
   }

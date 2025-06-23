@@ -5,6 +5,7 @@ import 'package:supaeromoon_ground_station/data_source/data_source.dart';
 import 'package:supaeromoon_ground_station/data_storage/session.dart';
 import 'package:supaeromoon_ground_station/io/localization.dart';
 import 'package:supaeromoon_ground_station/lifecycle.dart';
+import 'package:supaeromoon_ground_station/notifications/notification_widgets.dart';
 import 'package:supaeromoon_ground_station/ui/input_widgets/dash_menu.dart';
 import 'package:supaeromoon_ground_station/ui/input_widgets/sliding_switch.dart';
 import 'package:supaeromoon_ground_station/ui/tabs/tab_base.dart';
@@ -36,22 +37,28 @@ class MainScreen extends StatelessWidget {
         children: [
           const TopMenu(),
           Expanded(
-            child: Row(
+            child: Stack(
+              alignment: Alignment.topRight,
               children: [
-                DashMenuSlidingSwitch(controller: _topMenuController, dashController: _dashController,),
-                Expanded(
-                  child: Column(
-                    children: [
-                      Expanded(child: TabTree(controller: _tabTreeController)),
-                      SizedBox(
-                        height: 100,
-                        child: Container(
-                          color: Colors.red
-                        )
+                Row(
+                  children: [
+                    DashMenuSlidingSwitch(controller: _topMenuController, dashController: _dashController,),
+                    Expanded(
+                      child: Column(
+                        children: [
+                          Expanded(child: TabTree(controller: _tabTreeController)),
+                          SizedBox(
+                            height: 100,
+                            child: Container(
+                              color: Colors.red
+                            )
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
+                const NotificationOverlay()
               ],
             ),
           ),

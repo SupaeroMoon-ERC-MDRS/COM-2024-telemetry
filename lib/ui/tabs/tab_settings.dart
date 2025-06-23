@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:supaeromoon_ground_station/data_misc/virtual_signals.dart';
 import 'package:supaeromoon_ground_station/data_storage/session.dart';
 import 'package:supaeromoon_ground_station/io/logger.dart';
+import 'package:supaeromoon_ground_station/ui/dialogs/dialog_base.dart';
+import 'package:supaeromoon_ground_station/ui/dialogs/virtual_signal_add.dart';
+import 'package:supaeromoon_ground_station/ui/input_widgets/expr_menu.dart';
 import 'package:supaeromoon_ground_station/ui/input_widgets/multiline_textfield.dart';
 import 'package:supaeromoon_ground_station/ui/input_widgets/textfield.dart';
+import 'package:supaeromoon_ground_station/ui/tabs/tab_base.dart';
 import 'package:supaeromoon_ground_station/ui/theme.dart';
 import 'package:supaeromoon_ground_station/ui/visuals/panel.dart';
 
@@ -104,6 +109,31 @@ List<Widget> settingsTab = [
             colsize: 2,
             size: Size(400 + 2 * ThemeManager.globalStyle.padding, 30 * 2 + 2 * ThemeManager.globalStyle.padding),
             widgets: _settingsPanelLogReplay
+          ),
+          Panel(
+            colsize: 1,
+            widgets: [
+              ExpressionMenu(
+                title: "Virtual signals",
+                titleTooltip: "Signals that are computed as a function of other signals",
+                getLen: VirtualSignalController.getLen,
+                removeAt: VirtualSignalController.remove,
+                getElemWidget: VirtualSignalController.getWidget,
+                addNew: () async {
+                  await showDialog(
+                    context: TabTree.context,
+                    builder:(context) {
+                      return const DialogBase(
+                        title: "Virtual signal creator",
+                        minWidth: 1000,
+                        dialog: VirtualSignalAddDialog(),
+                      );
+                    },
+                  );
+                }
+              )
+            ],
+            size: Size(400 + 2 * ThemeManager.globalStyle.padding, 250 + 2 * ThemeManager.globalStyle.padding),
           ),
         ],
       ),

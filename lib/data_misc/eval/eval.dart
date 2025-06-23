@@ -15,6 +15,17 @@ class ExecTree{
   factory ExecTree.empty(){
     return ExecTree(left: null, right: null, op: null, value: null);
   }
+  @override
+  int get hashCode => left.hashCode ^ right.hashCode ^ op.hashCode ^ value.hashCode ^ prec.hashCode;
+  
+  @override
+  bool operator ==(covariant ExecTree other) {
+    return left == other.left &&
+          right == other.right &&
+          op?.index == other.op?.index &&
+          value == other.value &&
+          prec == other.prec;
+  }
 }
 
 abstract class Evaluator{
@@ -24,15 +35,15 @@ abstract class Evaluator{
       final ExecTree exec = Parser.parse(tokens);
       if(T is bool && !BOOLRES[exec.op]!){
         localLogger.error("Expression does not resolve to bool", doNoti: false);
-        throw Exception();
+        throw Exception("Expression does not resolve to bool");
       }
       else if(T is num && BOOLRES[exec.op]!){
         localLogger.error("Expression does not resolve to num", doNoti: false);
-        throw Exception();
+        throw Exception("Expression does not resolve to num");
       }
       else if(!_validityChecks(exec)){
         localLogger.error("Expression has invalid operations", doNoti: false);
-        throw Exception();
+        throw Exception("Expression has invalid operations");
       }
       return exec;
     }
@@ -66,6 +77,7 @@ abstract class Evaluator{
     final bool valid = NUMIN[node.op]! && !ltype && !rtype || BOOLIN[node.op]! && ltype && rtype;
     if(!valid){
       localLogger.error("Operation ${OPERATORS[node.op!.index]} had lhs of ${ltype ? 'bool' : 'num'} and rhs ${rtype ? 'bool' : 'num'}", doNoti: false);
+      throw Exception("Operation ${OPERATORS[node.op!.index]} had lhs of ${ltype ? 'bool' : 'num'} and rhs ${rtype ? 'bool' : 'num'}");
     }
     return valid;
   }
@@ -144,12 +156,39 @@ abstract class Evaluator{
     return visit(node.op!, left, right);
   }
 
+  static int _traverseDepth(final ExecTree node, final void Function(int) visitor, final int depth){
+    if(node.left != null){
+      _traverseDepth(node.left!, visitor, depth + 1);
+    }
+    if(node.right != null){
+      _traverseDepth(node.right!, visitor, depth + 1);
+    }
+
+    visitor(depth);
+    return depth;
+  }
+
   static bool _validityChecks(final ExecTree exec){
     return _traverse(exec, _typeVisitor);    
   }
 
   static T eval<T>(final ExecTree exec){
     return _traverseReturn(exec, _execVisitor) as T;
+  }
+
+  static Map<int, int> getDepthMap(final ExecTree exec){
+    final Map<int, int> depthMap = {};
+
+    _traverseDepth(exec, (final int depth){
+      if(!depthMap.containsKey(depth)){
+        depthMap[depth] = 1;
+      }
+      else{
+        depthMap[depth] = depthMap[depth]! + 1;
+      }
+    }, 0);
+
+    return depthMap;
   }
 
   static List<String> requiredSignals(final ExecTree exec){

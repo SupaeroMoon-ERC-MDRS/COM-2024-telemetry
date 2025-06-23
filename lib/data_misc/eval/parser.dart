@@ -16,8 +16,8 @@ abstract class Parser{
         final bool isConst = num.tryParse(token.ident!) != null;
         final bool isBool = ["false", "true"].contains(token.ident!);
         if(!(isSig || isConst || isBool)){
-          localLogger.error("Identifier ${token.ident} is neither a signal or a constant");
-          return false;
+          localLogger.error("Identifier ${token.ident} is neither a signal nor a constant");
+          throw Exception("Identifier ${token.ident} is neither a signal nor a constant");
         }
       }
     }
@@ -27,24 +27,25 @@ abstract class Parser{
     for(int i = 0; i < bracketPos.length - 1; i++){
       if((bracketPos[i + 1] - bracketPos[i]) == 1 && tokens[bracketPos[i + 1]].bracketOpen != tokens[bracketPos[i]].bracketOpen){
         localLogger.error("Opening and closing brackets cannot be neighbouring");
-        return false;
+        throw Exception("Opening and closing brackets cannot be neighbouring");
       }
     }
 
     if(tokens.first.isOp || tokens.last.isOp){
       localLogger.error("Cannot start or finish with operator");
-      return false;
+      throw Exception("Cannot start or finish with operator");
     }
 
     for(int i = 0; i < tokens.length - 1; i++){
       if(tokens[i].isOp && tokens[i + 1].bracketClose){
         localLogger.error("Operator cannot be followed by closing bracket");
+        throw Exception("Operator cannot be followed by closing bracket");
       }
     }
 
     if(boCount != bcCount){
       localLogger.error("Opening and closing brackets mismatch");
-      return false;
+      throw Exception("Opening and closing brackets mismatch");
     }
     return true;
   }

@@ -197,7 +197,7 @@ abstract class Tokenizer{
           }
           catch(ex){
             localLogger.error("Operator $opString not recognized");
-            rethrow;
+            throw Exception("Operator $opString not recognized");   
           }
         }
         symbol = "";
@@ -222,7 +222,7 @@ abstract class Tokenizer{
           }
           catch(ex){
             localLogger.error("Operator $opString not recognized");
-            rethrow;
+            throw Exception("Operator $opString not recognized");   
           }
           symbol = "";
         }
@@ -243,23 +243,23 @@ abstract class Tokenizer{
       }
       catch(ex){
         localLogger.error("Operator $opString not recognized");
-        rethrow;
+        throw Exception("Operator $opString not recognized");   
       }
     }
 
     // Postprocess to fix unary operators
-    if(res.first.isOp == [Op.ADD, Op.SUB].contains(res.first.op)){
-      if(res[1].isIdent){  
+    if(res.first.isOp && [Op.ADD, Op.SUB].contains(res.first.op)){
+      if(res[1].isIdent && num.tryParse(res[1].ident!) != null){
         res[1] = Token.ident(OPERATORS[res.first.op!.index] + res[1].ident!);
         res.removeAt(0);
       }
-      else if(res[1].bracketOpen){
+      else if(res[1].bracketOpen || (res[1].isIdent && DataStorage.storage.containsKey(res[1].ident))){
         res[0] = Token.op(Op.MUL);
         res.insert(0, Token.ident("-1"));
       }
       else{
         localLogger.error("Syntax error at the start of the expression");
-        throw Exception();    
+        throw Exception("Syntax error at the start of the expression");    
       }
     }
 

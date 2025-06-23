@@ -29,6 +29,7 @@ class TabTree extends StatefulWidget {
   const TabTree({super.key, required this.controller});
 
   final TabTreeController controller;
+  static late BuildContext context;
 
   @override
   State<TabTree> createState() => _TabTreeState();
@@ -45,6 +46,7 @@ class _TabTreeState extends State<TabTree> {
 
   @override
   Widget build(BuildContext context) {
+    TabTree.context = context;
     return Container(
       padding: EdgeInsets.symmetric(horizontal: ThemeManager.globalStyle.padding),
       child: ListView(

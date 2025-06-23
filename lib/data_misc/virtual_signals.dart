@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:flutter/material.dart';
 import 'package:supaeromoon_ground_station/data_misc/eval/eval.dart';
 import 'package:supaeromoon_ground_station/data_source/data_source.dart';
 import 'package:supaeromoon_ground_station/data_storage/data_storage.dart';
@@ -7,6 +8,7 @@ import 'package:supaeromoon_ground_station/data_storage/signal_container.dart';
 import 'package:supaeromoon_ground_station/io/file_system.dart';
 import 'package:supaeromoon_ground_station/io/logger.dart';
 import 'package:supaeromoon_ground_station/io/serdes.dart';
+import 'package:supaeromoon_ground_station/ui/theme.dart';
 
 class VirtualSignal{
   final String name;
@@ -65,6 +67,8 @@ class VirtualSignal{
 abstract class VirtualSignalController{
   static final List<VirtualSignal> _virtualSignals = [];
 
+  static int getLen() => _virtualSignals.length;
+
   static void load(){
     final List<Map> ser;
     try{
@@ -97,6 +101,9 @@ abstract class VirtualSignalController{
   static void add(final VirtualSignal alarm){
     _virtualSignals.add(alarm..register());
   }
+
+  static Widget getWidget(final int index) => 
+    Text("${_virtualSignals[index].name} : ${_virtualSignals[index].expr}", style: ThemeManager.textStyle, maxLines: 1, overflow: TextOverflow.clip,);
 
   static void remove(final int index){
     _virtualSignals.removeAt(index).deregister();

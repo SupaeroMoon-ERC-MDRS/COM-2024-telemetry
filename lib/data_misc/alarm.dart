@@ -1,4 +1,6 @@
 import 'package:supaeromoon_ground_station/data_misc/eval/eval.dart';
+import 'package:supaeromoon_ground_station/data_misc/virtual_signals.dart';
+import 'package:supaeromoon_ground_station/data_source/database.dart';
 import 'package:supaeromoon_ground_station/data_storage/data_storage.dart';
 import 'package:supaeromoon_ground_station/io/file_system.dart';
 import 'package:supaeromoon_ground_station/io/logger.dart';
@@ -10,7 +12,8 @@ class Alarm{
   final bool active;
   final ExecTree exec;
   bool triggered = false;
-  final List<String> requiredSignals = [];
+  final List<String> inputs = [];
+  final List<String> regSignals = [];
 
   Alarm._({
     required this.name,
@@ -18,15 +21,64 @@ class Alarm{
     required this.expr,
     required this.exec
   }){
-    requiredSignals.addAll(Evaluator.requiredSignals(exec));
+    inputs.addAll(Evaluator.requiredSignals(exec));
   }
 
   bool get canTrigger => active & !triggered;
 
-  bool register(){
-    for(final String signal in requiredSignals){
+  void _regSignalsCalc(final List<VirtualSignal> virtualSignals){
+    final List<String> signalInputs = [];
+    final List<String> virtualInputs = [];
+
+    for(final String sig in inputs){
+      if(virtualSignals.any((v) => v.name == sig)){
+        virtualInputs.add(sig);
+      }
+      else{
+        signalInputs.add(sig);
+      }
+    }
+
+    final Set<int> signalMessageReq = {};
+    final Set<int> virtualDependency = {};
+    final Set<String> requirement = {};
+    final Set<String> dependency = {};
+
+    for(final String signal in signalInputs){
+      signalMessageReq.add(
+        DBCDatabase.messages.entries.firstWhere((message) => 
+          message.value.signals.containsKey(signal)).key
+      );
+    }
+
+    for(final String signal in virtualInputs){
+      requirement.add(signal);
+      final List<String> thisInputs = virtualSignals.firstWhere((v) => v.name == signal).inputs;
+      for(final String dep in thisInputs){
+        if(virtualSignals.any((v) => v.name == dep)){
+          dependency.add(dep);
+        }
+        else{
+          virtualDependency.add(
+            DBCDatabase.messages.entries.firstWhere((message) => 
+              message.value.signals.containsKey(signal)).key
+          );
+        }
+      }
+    }
+
+    final Set<String> req = signalMessageReq.difference(virtualDependency).map((e) => DBCDatabase.messages[e]!.signals.keys.last).toSet();
+    final Set<String> virtualReq = requirement.difference(dependency);
+    regSignals.clear();
+    regSignals.addAll([...req, ...virtualReq]);
+  }
+  
+  bool register(final List<VirtualSignal> virtualSignals){
+    _regSignalsCalc(virtualSignals);
+
+    for(final String signal in regSignals){
       if(DataStorage.storage.containsKey(signal)){
-        DataStorage.storage[signal]!.changeNotifier.addListener(_check);
+        DataStorage.storage[signal]!.everyUpdateNotifier.addListener(_check);
       }
       else{
         deregister();
@@ -37,15 +89,15 @@ class Alarm{
   }
 
   void deregister(){
-    for(final String signal in requiredSignals){
+    for(final String signal in regSignals){
       if(DataStorage.storage.containsKey(signal)){
-        DataStorage.storage[signal]!.changeNotifier.removeListener(_check);
+        DataStorage.storage[signal]!.everyUpdateNotifier.removeListener(_check);
       }
     }
   }
 
   void _check(){
-    if(canTrigger && requiredSignals.every((final String signal) => DataStorage.storage[signal]!.vt.isNotEmpty) && Evaluator.eval<bool>(exec)){
+    if(canTrigger && inputs.every((final String signal) => DataStorage.storage[signal]!.vt.isNotEmpty) && Evaluator.eval<bool>(exec)){
       triggered = true;
       // TODO play sound
       // TODO do notif
@@ -90,12 +142,12 @@ abstract class AlarmController{
     _alarms.removeWhere((alarm) => alarm.name == "NOSIG");
 
     for(final Alarm alarm in _alarms){
-      alarm.register();
+      alarm.register(VirtualSignalController.virtualSignalsView);
     }
   }
 
   static void add(final Alarm alarm){
-    _alarms.add(alarm..register());
+    _alarms.add(alarm..register(VirtualSignalController.virtualSignalsView));
   }
 
   static void remove(final int index){

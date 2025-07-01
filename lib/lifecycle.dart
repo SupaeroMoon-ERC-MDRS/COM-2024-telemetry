@@ -35,8 +35,8 @@ abstract class LifeCycle{
       }
     }
     DataStorage.setup();
-    AlarmController.load();
     VirtualSignalController.load();
+    AlarmController.load();
   }
 
   static void postInit(WindowListener root){
@@ -55,8 +55,8 @@ abstract class LifeCycle{
   static Future<void> shutdown() async {
     DataSource.stop();
     Session.save();
-    AlarmController.save();
     VirtualSignalController.save();
+    AlarmController.save();
     await localLogger.stop();
     exit(0);
   }

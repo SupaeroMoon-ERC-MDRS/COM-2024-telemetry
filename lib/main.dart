@@ -50,7 +50,7 @@ class _AppState extends State<App> with WindowListener {
       title: "Supaeromoon Ground Station",
       theme: ThemeManager.getThemeData(context),
       routes: {
-        "/":(context) => const MainScreen(),
+        "/": (context) => const MainScreen(),
         //"/settings" : ,
       },
       initialRoute: "/",

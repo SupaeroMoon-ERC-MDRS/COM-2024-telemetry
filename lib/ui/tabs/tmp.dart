@@ -143,4 +143,24 @@ const List<Widget> dummyTab3 = [
       ),
     ],
   ),
+  Row(
+    children: [
+      Flexible(
+        child: TimeSeriesChart(
+          subscribedSignals: ["rpi_ina_voltage", "rpi_ina_current"],
+          title: "INA",
+          min: 0,
+          max: 20
+        ),
+      ),
+      Flexible(
+        child: TimeSeriesChart(
+          subscribedSignals: ["rpi_rssi"],
+          title: "RSSI",
+          min: -100,
+          max: 50
+        ),
+      ),
+    ],
+  ),
 ];

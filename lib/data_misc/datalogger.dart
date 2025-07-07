@@ -58,8 +58,8 @@ abstract class Datalogger{
 
   static Uint8List _createBuffer(int timestamp, Uint8List buffer){
     Uint8List header = Uint8List(4 + 4);
-    header.buffer.asByteData().setUint32(0, buffer.length);
-    header.buffer.asByteData().setUint32(4, timestamp);
+    header.buffer.asByteData().setUint32(0, buffer.length, Endian.little);
+    header.buffer.asByteData().setUint32(4, timestamp, Endian.little);
 
     return Uint8List.fromList([...header, ...buffer]);
   }

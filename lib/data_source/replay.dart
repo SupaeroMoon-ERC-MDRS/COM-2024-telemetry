@@ -40,9 +40,9 @@ abstract class Replay{
       return;
     }
 
-    final int len = _bytes!.buffer.asByteData().getUint32(_pos);
+    final int len = _bytes!.buffer.asByteData().getUint32(_pos, Endian.little);
     _pos += 4;
-    final int timestamp = _bytes!.buffer.asByteData().getUint32(_pos);
+    final int timestamp = _bytes!.buffer.asByteData().getUint32(_pos, Endian.little);
     _pos += 4;
     if(_bytes!.length <= _pos + len){
       _active = false;
@@ -69,7 +69,7 @@ abstract class Replay{
     }
 
     _active = true;    
-    final int nexttimestamp = _bytes!.buffer.asByteData().getUint32(_pos + 4);
+    final int nexttimestamp = _bytes!.buffer.asByteData().getUint32(_pos + 4, Endian.little);
     Future.delayed(Duration(milliseconds: ((nexttimestamp - timestamp) * speed).toInt()), _process);
   }
 

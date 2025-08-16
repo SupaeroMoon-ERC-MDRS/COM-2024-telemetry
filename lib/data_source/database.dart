@@ -224,7 +224,7 @@ class Bitarray{
     }
 
     for(int i = full * 8; i < bitlen; i++){
-      sum += pow(2, i).toInt() * ((buf[full] & pow(2, i % 8).toInt()) >> i);
+      sum += pow(2, i).toInt() * ((buf[full] & pow(2, i % 8).toInt()) >> (i % 8).toInt());
     }
     return isUnsigned ? sum : sum.toSigned(bitlen);
   }

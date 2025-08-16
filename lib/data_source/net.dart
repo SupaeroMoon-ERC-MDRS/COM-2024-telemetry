@@ -114,6 +114,7 @@ abstract class Net{
   }
 
   static void stop(){
+    _lastConnectionAttempt = 0;
     _timer.cancel();
     _net.shutdown();
     _hasRover = false;

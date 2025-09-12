@@ -68,7 +68,7 @@ abstract class Net{
     await _setup();
     _timer = Timer.periodic(const Duration(milliseconds: 1), (timer) async {
       if(_net.isInitialized() && !_net.needReset()){
-        if(timer.tick - _lastConnectionAttempt > 1000){ // every 1 sec TODO session
+        if(timer.tick - _lastConnectionAttempt > Session.reconnectTimerMs){
           _lastConnectionAttempt = timer.tick;
 
           if(!_net.hasPublishersType(NodeType.rover)){

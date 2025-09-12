@@ -5,6 +5,7 @@ abstract class Session{
   static List<String> dbcPaths = [];
   static int chartRefreshMs = 16;
   static int tabIndex = 0;
+  static int reconnectTimerMs = 1000;
   static String subnet = "192.168.43.";
   static String raspiIp = "192.168.43.156";
   static String logSavePath = "log.bin";
@@ -16,6 +17,7 @@ abstract class Session{
       "dbcPaths": dbcPaths,
       "chartRefreshMs": chartRefreshMs,
       "tabIndex": tabIndex,
+      "reconnectTimerMs": reconnectTimerMs,
       "subnet": subnet,
       "raspiIp": raspiIp,
       "logSavePath": logSavePath,
@@ -40,6 +42,10 @@ abstract class Session{
 
     if(data.containsKey("tabIndex") && data["tabIndex"] is int){
       tabIndex = data["tabIndex"];
+    }
+
+    if(data.containsKey("reconnectTimerMs") && data["reconnectTimerMs"] is int){
+      reconnectTimerMs = data["reconnectTimerMs"];
     }
 
     if(data.containsKey("subnet") && data["subnet"] is String){

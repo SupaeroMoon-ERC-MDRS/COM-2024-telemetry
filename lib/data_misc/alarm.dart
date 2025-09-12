@@ -5,12 +5,21 @@ import 'package:supaeromoon_ground_station/data_storage/data_storage.dart';
 import 'package:supaeromoon_ground_station/io/file_system.dart';
 import 'package:supaeromoon_ground_station/io/logger.dart';
 import 'package:supaeromoon_ground_station/io/serdes.dart';
+import 'package:supaeromoon_ground_station/notifications/notification_logic.dart' as noti;
+
+enum AlarmLevel{
+  // ignore: constant_identifier_names
+  CAUTION,
+  // ignore: constant_identifier_names
+  MASTER,
+}
 
 class Alarm{
   final String name;
   final String expr;
   final bool active;
   final ExecTree exec;
+  final AlarmLevel level;
   bool triggered = false;
   final List<String> inputs = [];
   final List<String> regSignals = [];
@@ -19,7 +28,8 @@ class Alarm{
     required this.name,
     required this.active,
     required this.expr,
-    required this.exec
+    required this.exec,
+    required this.level
   }){
     inputs.addAll(Evaluator.requiredSignals(exec));
   }
@@ -99,19 +109,25 @@ class Alarm{
   void _check(){
     if(canTrigger && inputs.every((final String signal) => DataStorage.storage[signal]!.vt.isNotEmpty) && Evaluator.eval<bool>(exec)){
       triggered = true;
+      if(level == AlarmLevel.CAUTION){
+        noti.NotificationController.add(noti.Notification.decaying(LogEntry.warning("Alarm $name triggered"), 10000));
+      }
+      else{
+        noti.NotificationController.add(noti.Notification.persistent(LogEntry.warning("Alarm $name triggered")));
+      }
       // TODO play sound
-      // TODO do notif
     }
   }
 
   Map get asMap => {
     "name": name,
     "expr": expr,
-    "active": active
+    "active": active,
+    "level": level.index
   };
 
   factory Alarm.fromMap(final Map map){
-    return Alarm._(name: map["name"], active: map["active"], expr: map["expr"], exec: Evaluator.compile<bool>(map["expr"]));
+    return Alarm._(name: map["name"], active: map["active"], expr: map["expr"], exec: Evaluator.compile<bool>(map["expr"]), level: AlarmLevel.values[map["level"]]);
   }
 }
 
@@ -136,7 +152,7 @@ abstract class AlarmController{
         return Alarm.fromMap(e);
       }catch(ex){
         localLogger.error("Failed to parse alarm: ${ex.toString()}");
-        return Alarm._(name: "NOSIG", expr: "", active: false, exec: ExecTree.empty());
+        return Alarm._(name: "NOSIG", expr: "", active: false, exec: ExecTree.empty(), level: AlarmLevel.CAUTION);
       }
     }));
     _alarms.removeWhere((alarm) => alarm.name == "NOSIG");

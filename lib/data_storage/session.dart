@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:supaeromoon_ground_station/io/file_system.dart';
 
 abstract class Session{
@@ -10,6 +12,8 @@ abstract class Session{
   static String raspiIp = "192.168.43.156";
   static String logSavePath = "log.bin";
   static String logReadPath = "log.bin";
+  static String netCodePath = Platform.isWindows ? "udpcan-net-exports.dll" : Platform.isLinux ? "libudpcan-net-exports.so" : throw Exception("Unsupported platform");
+  static String remotePath = "";
 
   static void save(){
     FileSystem.trySaveMapToLocalSync(FileSystem.topDir, "SESSION", {
@@ -22,6 +26,8 @@ abstract class Session{
       "raspiIp": raspiIp,
       "logSavePath": logSavePath,
       "logReadPath": logReadPath,
+      "netCodePath": netCodePath,
+      "remotePath": remotePath,
     });
   }
   
@@ -62,6 +68,14 @@ abstract class Session{
     
     if(data.containsKey("logReadPath") && data["logReadPath"] is String){
       logReadPath = data["logReadPath"];
+    }
+    
+    if(data.containsKey("netCodePath") && data["netCodePath"] is String){
+      netCodePath = data["netCodePath"];
+    }
+    
+    if(data.containsKey("remotePath") && data["remotePath"] is String){
+      remotePath = data["remotePath"];
     }
   }
 }

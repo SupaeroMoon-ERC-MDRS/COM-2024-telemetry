@@ -1,7 +1,7 @@
 import 'dart:ffi';
-import 'dart:io';
 import 'dart:typed_data';
 import 'package:ffi/ffi.dart';
+import 'package:supaeromoon_ground_station/data_storage/session.dart';
 import 'package:supaeromoon_ground_station/io/logger.dart';
 
 enum NodeType{
@@ -138,16 +138,7 @@ abstract class _NetCodeDLL{
 
   static bool initialize(){
     try{
-      final DynamicLibrary dll;
-      if(Platform.isWindows){
-        dll = DynamicLibrary.open("udpcan-net-exports.dll");
-      }
-      else if(Platform.isLinux){
-        dll = DynamicLibrary.open("libudpcan-net-exports.so");
-      }
-      else{
-        exit(1);
-      }
+      final DynamicLibrary dll = DynamicLibrary.open(Session.netCodePath);
 
       //bytesCreate = dll.lookup<NativeFunction<BytesCreateCD>>('BytesCreate').asFunction<BytesCreateCD>();
       bytesFrom = dll.lookup<NativeFunction<BytesFromC>>('BytesFrom').asFunction<BytesFromD>();

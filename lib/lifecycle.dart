@@ -47,16 +47,22 @@ abstract class LifeCycle{
       DataSource.selftest();
     }
     else{
-      localLogger.critical("Netcode loading failed, shutting down", doNoti: false);
-      exit(1);
+      localLogger.critical("Netcode loading failed, Network mode is unavailable", doNoti: true);
     }
   }
 
   static Future<void> shutdown() async {
-    DataSource.stop();
     Session.save();
-    VirtualSignalController.save();
-    AlarmController.save();
+    try{
+      DataSource.stop();
+      VirtualSignalController.save();
+      AlarmController.save();
+
+    // ignore: empty_catches
+    }catch(ex){
+      
+    }
+    
     await localLogger.stop();
     exit(0);
   }

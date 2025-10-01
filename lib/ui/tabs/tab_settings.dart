@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supaeromoon_ground_station/data_misc/virtual_signals.dart';
+import 'package:supaeromoon_ground_station/data_source/netcode_interop.dart';
 import 'package:supaeromoon_ground_station/data_storage/session.dart';
 import 'package:supaeromoon_ground_station/io/logger.dart';
 import 'package:supaeromoon_ground_station/ui/dialogs/dialog_base.dart';
@@ -70,6 +71,32 @@ List<Widget> _settingsPanelTopLeft = [
       return Session.raspiIp;
     }
   ),
+  InTextField(
+    label: "Remote path",
+    tooltip: "",
+    getInitialValue: () => Session.remotePath,
+    onEditingComplete: (final String newValue){
+      Session.remotePath = newValue;
+      return Session.remotePath;
+    }
+  ),
+  InTextField(
+    label: "Netcode path",
+    tooltip: "",
+    getInitialValue: () => Session.netCodePath,
+    onEditingComplete: (final String newValue){
+      final String oldValue = Session.netCodePath;
+      Session.netCodePath = newValue;
+      if(!NetCode.loadDLL()){
+        Session.netCodePath = oldValue;
+        localLogger.critical("Netcode loading failed, Network mode is unavailable", doNoti: true);
+      }
+      else{
+        localLogger.info("Netcode loading successful, Network mode is available", doNoti: true);
+      }
+      return Session.netCodePath;
+    }
+  ),
 ];
 
 List<Widget> _settingsPanelLogReplay = [
@@ -101,8 +128,8 @@ List<Widget> settingsTab = [
       Column(
         children: [
           Panel(
-            colsize: 4,
-            size: Size(400 + 2 * ThemeManager.globalStyle.padding, 30 * 4 + 2 * ThemeManager.globalStyle.padding),
+            colsize: 6,
+            size: Size(400 + 2 * ThemeManager.globalStyle.padding, 30 * 6 + 2 * ThemeManager.globalStyle.padding),
             widgets: _settingsPanelTopLeft
           ),
           Panel(

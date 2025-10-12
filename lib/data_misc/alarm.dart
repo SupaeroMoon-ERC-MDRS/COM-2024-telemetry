@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:supaeromoon_ground_station/data_misc/eval/eval.dart';
 import 'package:supaeromoon_ground_station/data_misc/virtual_signals.dart';
 import 'package:supaeromoon_ground_station/data_source/database.dart';
@@ -6,6 +7,7 @@ import 'package:supaeromoon_ground_station/io/file_system.dart';
 import 'package:supaeromoon_ground_station/io/logger.dart';
 import 'package:supaeromoon_ground_station/io/serdes.dart';
 import 'package:supaeromoon_ground_station/notifications/notification_logic.dart' as noti;
+import 'package:supaeromoon_ground_station/ui/theme.dart';
 
 enum AlarmLevel{
   // ignore: constant_identifier_names
@@ -136,6 +138,8 @@ abstract class AlarmController{
 
   static List<Alarm> get alarms => _alarms;
 
+  static int getLen() => _alarms.length;
+
   static void load(){
     final List<Map> ser;
     try{
@@ -165,6 +169,10 @@ abstract class AlarmController{
   static void add(final Alarm alarm){
     _alarms.add(alarm..register(VirtualSignalController.virtualSignalsView));
   }
+
+  static Widget getWidget(final int index) => 
+    Text("${_alarms[index].name} : ${_alarms[index].expr}", style: ThemeManager.textStyle, maxLines: 1, overflow: TextOverflow.clip,);
+
 
   static void remove(final int index){
     _alarms.removeAt(index).deregister();

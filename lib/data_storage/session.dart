@@ -9,7 +9,7 @@ abstract class Session{
   static int tabIndex = 0;
   static int reconnectTimerMs = 1000;
   static String subnet = "192.168.43.";
-  static String raspiIp = "192.168.43.156";
+  static String raspiIp = "192.168.43.43";
   static String logSavePath = "log.bin";
   static String logReadPath = "log.bin";
   static String netCodePath = Platform.isWindows ? "udpcan-net-exports.dll" : Platform.isLinux ? "libudpcan-net-exports.so" : throw Exception("Unsupported platform");

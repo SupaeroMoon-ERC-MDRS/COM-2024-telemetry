@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:supaeromoon_ground_station/data_misc/alarm.dart';
 import 'package:supaeromoon_ground_station/data_misc/virtual_signals.dart';
 import 'package:supaeromoon_ground_station/data_source/netcode_interop.dart';
 import 'package:supaeromoon_ground_station/data_storage/session.dart';
 import 'package:supaeromoon_ground_station/io/logger.dart';
+import 'package:supaeromoon_ground_station/ui/dialogs/alarm_add.dart';
 import 'package:supaeromoon_ground_station/ui/dialogs/dialog_base.dart';
 import 'package:supaeromoon_ground_station/ui/dialogs/virtual_signal_add.dart';
 import 'package:supaeromoon_ground_station/ui/input_widgets/expr_menu.dart';
@@ -154,6 +156,31 @@ List<Widget> settingsTab = [
                         title: "Virtual signal creator",
                         minWidth: 1000,
                         dialog: VirtualSignalAddDialog(),
+                      );
+                    },
+                  );
+                }
+              )
+            ],
+            size: Size(400 + 2 * ThemeManager.globalStyle.padding, 250 + 2 * ThemeManager.globalStyle.padding),
+          ),
+          Panel(
+            colsize: 1,
+            widgets: [
+              ExpressionMenu(
+                title: "Alarms",
+                titleTooltip: "Alarms that trigger on a condition",
+                getLen: AlarmController.getLen,
+                removeAt: AlarmController.remove,
+                getElemWidget: AlarmController.getWidget,
+                addNew: () async {
+                  await showDialog(
+                    context: TabTree.context,
+                    builder:(context) {
+                      return const DialogBase(
+                        title: "Alarm creator",
+                        minWidth: 1000,
+                        dialog: AlarmAddDialog(),
                       );
                     },
                   );

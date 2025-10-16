@@ -87,7 +87,6 @@ class TopMenu extends StatelessWidget {
             splashColor: Colors.grey,
             icon: const Icon(Icons.menu)
           ),
-          
           Expanded(
             child: Container(
               color: ThemeManager.globalStyle.secondaryColor,

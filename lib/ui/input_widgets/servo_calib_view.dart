@@ -31,17 +31,17 @@ class _ServoCalibViewState extends State<ServoCalibView> {
 
   @override
   void initState() {
-    _load();
-    if(DataStorage.storage["fl_calib"]!.vt.isEmpty){
+    Future.delayed(Duration(milliseconds: 100), _load);
+    if(DataStorage.storage["fl_calib"]?.vt.isEmpty ?? false){
       Future.delayed(Duration(milliseconds: 100), _downloadRequest);
     }
     else{
-      realStatus.fl = DataStorage.storage["fl_calib"]!.vt.lastOrNull?.value.toInt() ?? -1;
-      realStatus.fr = DataStorage.storage["fr_calib"]!.vt.lastOrNull?.value.toInt() ?? -1;
-      realStatus.rl = DataStorage.storage["rl_calib"]!.vt.lastOrNull?.value.toInt() ?? -1;
-      realStatus.rr = DataStorage.storage["rr_calib"]!.vt.lastOrNull?.value.toInt() ?? -1;
+      realStatus.fl = DataStorage.storage["fl_calib"]?.vt.lastOrNull?.value.toInt() ?? -1;
+      realStatus.fr = DataStorage.storage["fr_calib"]?.vt.lastOrNull?.value.toInt() ?? -1;
+      realStatus.rl = DataStorage.storage["rl_calib"]?.vt.lastOrNull?.value.toInt() ?? -1;
+      realStatus.rr = DataStorage.storage["rr_calib"]?.vt.lastOrNull?.value.toInt() ?? -1;
     }
-    DataStorage.storage["rr_calib"]!.changeNotifier.addListener(_readCalibStatusFromBuffer);
+    DataStorage.storage["rr_calib"]?.changeNotifier.addListener(_readCalibStatusFromBuffer);
     super.initState();
   }
 
@@ -186,7 +186,7 @@ class _ServoCalibViewState extends State<ServoCalibView> {
 
   @override
   void dispose() {
-    DataStorage.storage["rr_calib"]!.changeNotifier.removeListener(_readCalibStatusFromBuffer);
+    DataStorage.storage["rr_calib"]?.changeNotifier.removeListener(_readCalibStatusFromBuffer);
     super.dispose();
   }
 }

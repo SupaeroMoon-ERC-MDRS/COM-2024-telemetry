@@ -47,6 +47,7 @@ abstract class LifeCycle{
       DataSource.selftest();
     }
     else{
+      DataSource.selftest();
       localLogger.critical("Netcode loading failed, Network mode is unavailable", doNoti: true);
     }
   }

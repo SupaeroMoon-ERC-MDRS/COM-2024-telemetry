@@ -41,6 +41,9 @@ class _ServoCalibViewState extends State<ServoCalibView> {
       realStatus.rl = DataStorage.storage["rl_calib"]?.vt.lastOrNull?.value.toInt() ?? -1;
       realStatus.rr = DataStorage.storage["rr_calib"]?.vt.lastOrNull?.value.toInt() ?? -1;
     }
+    DataStorage.storage["fl_calib"]?.changeNotifier.addListener(_readCalibStatusFromBuffer);
+    DataStorage.storage["fr_calib"]?.changeNotifier.addListener(_readCalibStatusFromBuffer);
+    DataStorage.storage["rl_calib"]?.changeNotifier.addListener(_readCalibStatusFromBuffer);
     DataStorage.storage["rr_calib"]?.changeNotifier.addListener(_readCalibStatusFromBuffer);
     super.initState();
   }
@@ -186,6 +189,9 @@ class _ServoCalibViewState extends State<ServoCalibView> {
 
   @override
   void dispose() {
+    DataStorage.storage["fl_calib"]?.changeNotifier.removeListener(_readCalibStatusFromBuffer);
+    DataStorage.storage["fr_calib"]?.changeNotifier.removeListener(_readCalibStatusFromBuffer);
+    DataStorage.storage["rl_calib"]?.changeNotifier.removeListener(_readCalibStatusFromBuffer);
     DataStorage.storage["rr_calib"]?.changeNotifier.removeListener(_readCalibStatusFromBuffer);
     super.dispose();
   }

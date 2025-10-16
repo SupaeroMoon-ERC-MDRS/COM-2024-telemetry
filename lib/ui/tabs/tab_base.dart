@@ -15,9 +15,8 @@ class TabEntry{
 class TabTreeController{
   final List<TabEntry> tree = [
     TabEntry(name: "Settings", icon: Icons.settings, tree: settingsTab),
-    const TabEntry(name: "Dummy1", icon: Icons.tab, tree: dummyTab1),
-    const TabEntry(name: "Dummy2", icon: Icons.tab, tree: dummyTab2),
-    const TabEntry(name: "Dummy3", icon: Icons.tab, tree: dummyTab3),
+    const TabEntry(name: "Remote Control", icon: Icons.control_camera, tree: remoteControlTab),
+    const TabEntry(name: "Electrical", icon: Icons.electric_bolt, tree: electricalTab),
   ];
   final BlankNotifier notifier = BlankNotifier(null);
   int index;

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:supaeromoon_ground_station/data_misc/datalogger.dart';
 import 'package:supaeromoon_ground_station/data_source/data_source.dart';
@@ -8,6 +9,7 @@ import 'package:supaeromoon_ground_station/data_source/netcode_interop.dart';
 import 'package:supaeromoon_ground_station/data_storage/data_storage.dart';
 import 'package:supaeromoon_ground_station/data_storage/session.dart';
 import 'package:supaeromoon_ground_station/io/logger.dart';
+import 'package:supaeromoon_ground_station/notifications/notification_logic.dart' as noti;
 
 late final String _wlanIp;
 
@@ -111,6 +113,24 @@ abstract class Net{
         _net.reset(DBCDatabase.dbcVersion, 12123, _wlanIp, NodeType.gs);
       }
     });
+  }
+
+  static bool sendToRover(final Uint8List bytes){
+    if(!DataSource.isMode(DataSourceMode.net)){
+      noti.NotificationController.add(noti.Notification.decaying(LogEntry.warning("Not in network mode"), 5000));
+      return false;
+    }
+
+    if(!_hasRover){
+      noti.NotificationController.add(noti.Notification.decaying(LogEntry.warning("Has not established connection with rover"), 5000));
+      return false;
+    }
+
+    final bool res = _net.sendTo(bytes, Session.raspiIp, 12121);
+    if(!res){
+      noti.NotificationController.add(noti.Notification.decaying(LogEntry.warning("Error when sending message to rover, check logs"), 5000));
+    }
+    return res;
   }
 
   static void stop(){

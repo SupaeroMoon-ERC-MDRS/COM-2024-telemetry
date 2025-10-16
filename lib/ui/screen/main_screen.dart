@@ -47,12 +47,12 @@ class MainScreen extends StatelessWidget {
                       child: Column(
                         children: [
                           Expanded(child: TabTree(controller: _tabTreeController)),
-                          SizedBox(
+                          /*SizedBox(
                             height: 100,
                             child: Container(
                               color: Colors.red
                             )
-                          ),
+                          ),*/
                         ],
                       ),
                     ),

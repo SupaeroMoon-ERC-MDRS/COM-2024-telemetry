@@ -22,6 +22,22 @@ abstract class StringMapping{
       return "UNDEF";
     }
   }
+  
+  static String eStopMapping(final num? v){
+    if(v is! int){
+      localLogger.warning("Non-int value was passed as a string mapping", doNoti: false);
+      return "";
+    }
+
+    const List<String> mapping = ["Estop inactive", "Estop active"];
+
+    if(mapping.length > v){
+      return mapping[v];
+    }
+    else{
+      return "Unknown";
+    }
+  }
 }
 
 class StringIndicator extends StatefulWidget {

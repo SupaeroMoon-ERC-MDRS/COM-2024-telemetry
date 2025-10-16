@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:supaeromoon_ground_station/data_misc/eval/eval.dart';
 import 'package:supaeromoon_ground_station/data_misc/virtual_signals.dart';
 import 'package:supaeromoon_ground_station/data_source/database.dart';
@@ -117,7 +118,7 @@ class Alarm{
       else{
         noti.NotificationController.add(noti.Notification.persistent(LogEntry.warning("Alarm $name triggered")));
       }
-      // TODO play sound
+      SystemSound.play(SystemSoundType.alert);
     }
   }
 

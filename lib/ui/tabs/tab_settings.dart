@@ -9,6 +9,7 @@ import 'package:supaeromoon_ground_station/ui/dialogs/dialog_base.dart';
 import 'package:supaeromoon_ground_station/ui/dialogs/virtual_signal_add.dart';
 import 'package:supaeromoon_ground_station/ui/input_widgets/expr_menu.dart';
 import 'package:supaeromoon_ground_station/ui/input_widgets/multiline_textfield.dart';
+import 'package:supaeromoon_ground_station/ui/input_widgets/servo_calib_view.dart';
 import 'package:supaeromoon_ground_station/ui/input_widgets/textfield.dart';
 import 'package:supaeromoon_ground_station/ui/tabs/tab_base.dart';
 import 'package:supaeromoon_ground_station/ui/theme.dart';
@@ -191,10 +192,19 @@ List<Widget> settingsTab = [
           ),
         ],
       ),
-      Panel(
-        colsize: 1,
-        widgets: const [DBCSelector()],
-        size: Size(600 + 2 * ThemeManager.globalStyle.padding, 250 + 2 * ThemeManager.globalStyle.padding),
+      Column(
+        children: [
+          Panel(
+            colsize: 1,
+            widgets: const [DBCSelector()],
+            size: Size(600 + 2 * ThemeManager.globalStyle.padding, 250 + 2 * ThemeManager.globalStyle.padding),
+          ),
+          Panel(
+            colsize: 1,
+            widgets: const [ServoCalibView()],
+            size: Size(600 + 2 * ThemeManager.globalStyle.padding, 300 + 2 * ThemeManager.globalStyle.padding),
+          ),
+        ],
       ),
     ],
   )

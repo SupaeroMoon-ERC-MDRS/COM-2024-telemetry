@@ -11,6 +11,7 @@ abstract class Replay{
   static double speed = 1;
   static bool _stopReplay = false;
   static bool _active = false;
+  static bool _wasStopped = false;
   static int? replayTime;
 
   static Future<void> _setup() async {
@@ -29,10 +30,20 @@ abstract class Replay{
 
   static void stop() => _stopReplay = true;
 
-  static void pause() => _stopReplay = true;
+  static void pause() {
+    _stopReplay = true;
+    _wasStopped = true;
+  }
   static void resume(){
+    _wasStopped = false;
     if(_active) _process();
   }
+
+  static bool get isActive => _active;
+  
+  static bool get isStopped => _stopReplay;
+
+  static bool get wasStopped => _wasStopped;
 
   static void _process() async{
     if(_stopReplay == true){
@@ -70,7 +81,8 @@ abstract class Replay{
 
     _active = true;    
     final int nexttimestamp = _bytes!.buffer.asByteData().getUint32(_pos + 4, Endian.little);
-    Future.delayed(Duration(milliseconds: ((nexttimestamp - timestamp) * speed).toInt()), _process);
+    final int delayMs = ((nexttimestamp - timestamp) / Replay.speed).toInt().clamp(0, 1 << 31);
+    Future.delayed(Duration(milliseconds: delayMs), _process);
   }
 
   static void seek(int timestamp){

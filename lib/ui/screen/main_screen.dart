@@ -2,6 +2,7 @@ import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
 import 'package:supaeromoon_ground_station/data_misc/datalogger.dart';
 import 'package:supaeromoon_ground_station/data_source/data_source.dart';
+import 'package:supaeromoon_ground_station/data_source/replay.dart';
 import 'package:supaeromoon_ground_station/data_storage/session.dart';
 import 'package:supaeromoon_ground_station/io/localization.dart';
 import 'package:supaeromoon_ground_station/lifecycle.dart';
@@ -53,6 +54,52 @@ class MainScreen extends StatelessWidget {
                               color: Colors.red
                             )
                           ),*/
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              IconButton(
+                                onPressed: (){
+                                  Replay.speed = (Replay.speed / 2).clamp(0.25, 16.0);
+                                },
+                                iconSize: ThemeManager.globalStyle.subTitleFontSize + 6,
+                                padding: EdgeInsets.zero,
+                                splashColor: Colors.grey,
+                                icon: const Icon(Icons.fast_rewind)
+                              ),
+                              IconButton(
+                                onPressed: (){
+                                  if (Replay.wasStopped != true) {
+                                    Replay.pause();
+                                  }
+                                },
+                                iconSize: ThemeManager.globalStyle.subTitleFontSize + 6,
+                                padding: EdgeInsets.zero,
+                                splashColor: Colors.grey,
+                                icon: const Icon(Icons.pause)
+                              ),
+                              IconButton(
+                                onPressed: (){
+                                  Replay.speed = 1.0;
+                                  if (Replay.wasStopped == true) {
+                                    Replay.resume();
+                                  }
+                                },
+                                iconSize: ThemeManager.globalStyle.subTitleFontSize + 6,
+                                padding: EdgeInsets.zero,
+                                splashColor: Colors.grey,
+                                icon: const Icon(Icons.play_arrow)
+                              ),
+                              IconButton(
+                                onPressed: (){
+                                  Replay.speed = (Replay.speed * 2).clamp(0.25, 16.0);
+                                },
+                                iconSize: ThemeManager.globalStyle.subTitleFontSize + 6,
+                                padding: EdgeInsets.zero,
+                                splashColor: Colors.grey,
+                                icon: const Icon(Icons.fast_forward)
+                              ),
+                            ],
+                          ),
                         ],
                       ),
                     ),

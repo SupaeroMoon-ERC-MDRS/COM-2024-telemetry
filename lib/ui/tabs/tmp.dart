@@ -56,6 +56,18 @@ const List<Widget> electricalTab = [
     children: [
       ScaleIndicator(subscribedSignal: "raspi_mem", minValue: 0, maxValue: 100),
       ScaleIndicator(subscribedSignal: "raspi_cpu", minValue: 0, maxValue: 100),
+      SizedBox(
+        width: 250,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            NumericIndicator(subscribedSignal: "rpi_ina_voltage"),
+            NumericIndicator(subscribedSignal: "rpi_ina_current"),
+            NumericIndicator(subscribedSignal: "rpi_rssi"),
+            NumericIndicator(subscribedSignal: "rpi_ext5v_v"),
+          ],
+        ),
+      ),
     ],
   ),
   Row(
@@ -82,7 +94,7 @@ const List<Widget> electricalTab = [
     children: [
       Flexible(
         child: TimeSeriesChart(
-          subscribedSignals: ["rpi_3v7_wl_sw_a", "rpi_3v3_sys_a", "rpi_1v8_sys_a"],
+          subscribedSignals: ["rpi_0v8_sw_a", "vdd_core_a", "rpi_1v1_sys_a"],
           title: "Currents1",
           min: 0,
           max: 10
@@ -90,7 +102,7 @@ const List<Widget> electricalTab = [
       ),
       Flexible(
         child: TimeSeriesChart(
-          subscribedSignals: ["rpi_0v8_sw_a", "vdd_core_a", "rpi_1v1_sys_a"],
+          subscribedSignals: ["rpi_3v7_wl_sw_a", "rpi_3v3_sys_a", "rpi_1v8_sys_a"],
           title: "Currents2",
           min: 0,
           max: 10
@@ -102,7 +114,7 @@ const List<Widget> electricalTab = [
     children: [
       Flexible(
         child: TimeSeriesChart(
-          subscribedSignals: ["rpi_3v7_wl_sw_v", "rpi_3v3_sys_v", "rpi_1v8_sys_v", "rpi_1v1_sys_v"],
+          subscribedSignals: ["rpi_0v8_sw_v", "vdd_core_v", "rpi_1v1_sys_v"],
           title: "Voltages1",
           min: 0,
           max: 5
@@ -110,7 +122,7 @@ const List<Widget> electricalTab = [
       ),
       Flexible(
         child: TimeSeriesChart(
-          subscribedSignals: ["rpi_0v8_sw_v", "vdd_core_v", "rpi_ext5v_v"],
+          subscribedSignals: ["rpi_3v7_wl_sw_v", "rpi_3v3_sys_v", "rpi_1v8_sys_v","rpi_ext5v_v"],
           title: "Voltages2",
           min: 0,
           max: 5

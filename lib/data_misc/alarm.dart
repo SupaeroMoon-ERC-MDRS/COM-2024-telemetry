@@ -118,7 +118,16 @@ class Alarm{
       else{
         noti.NotificationController.add(noti.Notification.persistent(LogEntry.warning("Alarm $name triggered")));
       }
+      /// TODO Temporary
       SystemSound.play(SystemSoundType.alert);
+
+      /// Instead have a sound "library"
+      /// That is an abstract class, uses saved sound files in local storage
+      /// Has separate sounds for each log level (see [LogLevel enum]) plus two sounds for alarms
+      /// 
+      /// for implementation it should be an abstract class with static methods, be initialized in LifeCycle.preInit()
+      /// find a sound player libary on the pub.dev website that works on both windows and linux
+      /// in initialization you likely need to initialize some sound player library and load the sound files into memory (depends on the sound library you use)
     }
   }
 

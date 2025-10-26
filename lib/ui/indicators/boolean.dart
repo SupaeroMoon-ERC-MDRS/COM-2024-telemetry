@@ -1,15 +1,10 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:supaeromoon_ground_station/data_storage/data_storage.dart';
 import 'package:supaeromoon_ground_station/ui/common.dart';
 import 'package:supaeromoon_ground_station/ui/theme.dart';
 
 class BooleanIndicator extends StatefulWidget{
-  const BooleanIndicator({
-  Key? key,
-  required this.subscribedSignal, this.isInverted
-  }) : super(key: key);
+  const BooleanIndicator({super.key, required this.subscribedSignal, this.isInverted});
 
   final String subscribedSignal;
   final bool? isInverted; // null -> false, !null -> true

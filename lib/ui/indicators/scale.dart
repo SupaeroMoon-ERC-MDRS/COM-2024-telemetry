@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:latext/latext.dart';
 import 'package:supaeromoon_ground_station/data_storage/data_storage.dart';
+import 'package:supaeromoon_ground_station/data_storage/unit_system.dart';
 import 'package:supaeromoon_ground_station/ui/common.dart';
 import 'package:supaeromoon_ground_station/ui/theme.dart';
 
@@ -16,11 +18,13 @@ class ScaleIndicator extends StatefulWidget {
 
 class _ScaleIndicatorState extends State<ScaleIndicator> {
   late final String label;
+  late final CompoundUnit unit;
 
   @override
   void initState() {
     DataStorage.storage[widget.subscribedSignal]?.changeNotifier.addListener(_update);
     label = DataStorage.storage[widget.subscribedSignal]?.displayName ?? widget.subscribedSignal;
+    unit = DataStorage.storage[widget.subscribedSignal]?.unit ?? CompoundUnit.scalar();
     super.initState();
   }
 
@@ -31,14 +35,39 @@ class _ScaleIndicatorState extends State<ScaleIndicator> {
     return SizedBox(
       height: 200,
       width: 80,
-      child: CustomPaint(
-        size: const Size(200, 80),
-        painter: _ScaleIndicatorPainter(
-          label: label,
-          maxValue: widget.maxValue,
-          minValue: widget.minValue,
-          value: DataStorage.storage[widget.subscribedSignal]?.vt.lastOrNull?.value
-        ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(
+            child: CustomPaint(
+              size: const Size(170, 80),
+              painter: _ScaleIndicatorPainter(
+                label: label,
+                maxValue: widget.maxValue,
+                minValue: widget.minValue,
+                value: DataStorage.storage[widget.subscribedSignal]?.vt.lastOrNull?.value
+              ),
+            ),
+          ),
+          SizedBox(
+            height: 30,
+            width: 60,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  representNumber(DataStorage.storage[widget.subscribedSignal]?.vt.lastOrNull?.value), style: ThemeManager.textStyle
+                ),
+                LaTexT(
+                  laTeXCode: Text(
+                    " [${unit.toLaTextString()}]",
+                    style: ThemeManager.textStyle
+                  ),
+                ),
+              ],
+            ),
+          )
+        ],
       ),
     );
   }
@@ -64,24 +93,16 @@ class _ScaleIndicatorPainter extends CustomPainter {
       text: TextSpan(text: label, style: ThemeManager.textStyle),
       textDirection: TextDirection.ltr
     );
-    
-    final TextPainter valuetp = TextPainter(
-      text: TextSpan(text: representNumber(value), style: ThemeManager.textStyle),
-      textDirection: TextDirection.ltr
-    );
 
     labeltp.layout();
-    valuetp.layout();
 
     final Offset labels = Offset(labeltp.size.width, labeltp.size.height);
-    final Offset values = Offset(valuetp.size.width, valuetp.size.height);
 
     labeltp.paint(canvas, Offset(size.width / 2, 12) - labels / 2);
-    valuetp.paint(canvas, Offset(size.width / 2, size.height - 12) - values / 2);
 
     const double insetW = 10;
     const double insetH = 25;
-    final double splitHeight = size.height - insetH - normalizeInbetween(value ?? 0, minValue, maxValue, 0, size.height - 2 * insetH);
+    final double splitHeight = size.height - normalizeInbetween(value ?? 0, minValue, maxValue, 0, size.height - 1 * insetH);
 
     final Path empty = Path();
     empty.moveTo(insetW, insetH);
@@ -93,8 +114,8 @@ class _ScaleIndicatorPainter extends CustomPainter {
     final Path filled = Path();
     filled.moveTo(insetW, splitHeight);
     filled.lineTo(size.width - insetW, splitHeight);
-    filled.lineTo(size.width - insetW, size.height - insetH);
-    filled.lineTo(insetW, size.height - insetH);
+    filled.lineTo(size.width - insetW, size.height);
+    filled.lineTo(insetW, size.height);
     filled.lineTo(insetW, splitHeight);
 
     final Paint paintBase = Paint()..style = PaintingStyle.fill;

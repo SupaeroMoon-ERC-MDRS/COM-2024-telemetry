@@ -1,10 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:latext/latext.dart';
 import 'package:supaeromoon_ground_station/data_misc/notifiers.dart';
 import 'package:supaeromoon_ground_station/data_source/data_source.dart';
 import 'package:supaeromoon_ground_station/data_storage/data_storage.dart';
 import 'package:supaeromoon_ground_station/data_storage/session.dart';
+import 'package:supaeromoon_ground_station/data_storage/unit_system.dart';
 import 'package:supaeromoon_ground_station/io/logger.dart';
 import 'package:supaeromoon_ground_station/ui/common.dart';
 import 'package:supaeromoon_ground_station/ui/indicators/axis_data.dart';
@@ -95,6 +97,7 @@ class TimeSeriesChart extends StatefulWidget {
 
 class _TimeSeriesChartState extends State<TimeSeriesChart>{
   final List<String> labels = [];
+  final List<CompoundUnit> units = [];
   final UpdateableValueNotifier<ChartState> state = UpdateableValueNotifier<ChartState>(
     ChartState(
       maxValue: 0,
@@ -113,6 +116,7 @@ class _TimeSeriesChartState extends State<TimeSeriesChart>{
   @override
   void initState() {
     labels.addAll(widget.subscribedSignals.map((sig) => DataStorage.storage[sig]?.displayName ?? sig));
+    units.addAll(widget.subscribedSignals.map((sig) => DataStorage.storage[sig]?.unit ?? CompoundUnit.scalar()));
     state.value.maxValue = widget.max;
     state.value.minValue = widget.min;
     state.value.visibility.addAll(List.generate(widget.subscribedSignals.length, (index) => true));
@@ -146,7 +150,8 @@ class _TimeSeriesChartState extends State<TimeSeriesChart>{
                       state: state,
                       title: widget.title,
                       labels: labels,
-                      signals: widget.subscribedSignals
+                      signals: widget.subscribedSignals,
+                      units: units,
                     ),
                     TimeSeriesPlotArea(
                       state: state, 
@@ -250,12 +255,13 @@ class _YAxisPainter extends CustomPainter {
 }
 
 class ChartTopBar extends StatefulWidget {
-  const ChartTopBar({super.key, required this.state, required this.title, required this.labels, required this.signals});
+  const ChartTopBar({super.key, required this.state, required this.title, required this.labels, required this.signals, required this.units});
 
   final UpdateableValueNotifier<ChartState> state;
   final String title;
   final List<String> labels;
   final List<String> signals;
+  final List<CompoundUnit> units;
 
   @override
   State<ChartTopBar> createState() => _ChartTopBarState();
@@ -418,12 +424,22 @@ class _ChartTopBarState extends State<ChartTopBar> {
                 });
               },
               child: AdvancedTooltip(
-                tooltipText: "Listening to ${widget.signals[i]}",
-                child: Text(widget.labels[i], 
-                  style: TextStyle(
-                    color: widget.state.value.visibility[i] ? _colormap[i] : Colors.grey,
-                    fontSize: ThemeManager.globalStyle.fontSize
-                  ),
+                tooltipText: "Listening to ${widget.signals[i]} in unit ${widget.units[i].toSimpleString()}",
+                child: Row(
+                  children: [
+                    Text(widget.labels[i], 
+                      style: TextStyle(
+                        color: widget.state.value.visibility[i] ? _colormap[i] : Colors.grey,
+                        fontSize: ThemeManager.globalStyle.fontSize
+                      ),
+                    ),
+                    LaTexT(
+                      laTeXCode: Text(
+                        " [${widget.units[i].toLaTextString()}]",
+                        style: TextStyle(color: widget.state.value.visibility[i] ? _colormap[i] : Colors.grey, fontSize: ThemeManager.globalStyle.fontSize),
+                      ),
+                    ),
+                  ],
                 )
               )
             )

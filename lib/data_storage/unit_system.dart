@@ -751,13 +751,30 @@ class CompoundUnit{
     return UnitSystem.reduceToBase(this)..simplify();
   }
 
-  /*String toSimpleString(){
-    
-  }*/
+  String toSimpleString(){
+    if(isScalar()){
+      return "-";
+    }
+    else if(denom.isEmpty){
+      final List<String> parts = nom.entries.map((e) {
+        return e.value == 1 ? UnitSystem.getRepresentationForAlias(e.key) : "${UnitSystem.getRepresentationForAlias(e.key)}${e.value}";
+      }).toList();
+      return parts.join("");
+    }
+    else{
+      final List<String> nomParts = nom.entries.map((e) {
+        return e.value == 1 ? UnitSystem.getRepresentationForAlias(e.key) : "${UnitSystem.getRepresentationForAlias(e.key)}${e.value}";
+      }).toList();
+      final List<String> denomParts = denom.entries.map((e) {
+        return e.value == 1 ? UnitSystem.getRepresentationForAlias(e.key) : "${UnitSystem.getRepresentationForAlias(e.key)}${e.value}";
+      }).toList();
+      return "${nomParts.isEmpty ? "1" : nomParts.join("")}/${denomParts.join()}";
+    }
+  }
 
   String toLaTextString(){
     if(isScalar()){
-      return "";
+      return "-";
     }
     else if(denom.isEmpty){
       final List<String> parts = nom.entries.map((e) {

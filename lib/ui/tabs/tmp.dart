@@ -57,7 +57,7 @@ const List<Widget> electricalTab = [
       ScaleIndicator(subscribedSignal: "raspi_mem", minValue: 0, maxValue: 100),
       ScaleIndicator(subscribedSignal: "raspi_cpu", minValue: 0, maxValue: 100),
       SizedBox(
-        width: 250,
+        width: 300,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

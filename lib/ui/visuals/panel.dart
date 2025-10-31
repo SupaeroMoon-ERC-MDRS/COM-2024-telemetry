@@ -38,3 +38,49 @@ class Panel extends StatelessWidget {
     );
   }
 }
+
+class PanelWithHeaderFooter extends StatelessWidget {
+  const PanelWithHeaderFooter({super.key, required this.colsize, required this.widgets, required this.header, required this.footer, required this.size});
+
+  final int colsize;
+  final List<Widget> widgets;
+  final Widget header;
+  final Widget footer;
+  final Size size;
+
+  @override
+  Widget build(BuildContext context) {
+    final int colcount = (widgets.length / colsize).ceil();
+    return Container(
+      width: size.width,
+      height: size.height,
+      padding: EdgeInsets.all(ThemeManager.globalStyle.padding),
+      margin: EdgeInsets.all(ThemeManager.globalStyle.padding),
+      decoration: BoxDecoration(
+        color: ThemeManager.globalStyle.secondaryColor,
+        borderRadius: BorderRadius.circular(ThemeManager.globalStyle.padding)
+      ),
+      child: Column(
+        children: [
+          header,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for(int i = 0; i < colcount; i++)
+                Flexible(
+                  child: Column(
+                    children: [
+                      for(int j = 0; j < colsize && (i * colsize + j) < widgets.length; j++)
+                        widgets[i * colsize + j]
+                    ]
+                  ),
+                )
+                
+            ],
+          ),
+          footer,
+        ],
+      ),
+    );
+  }
+}

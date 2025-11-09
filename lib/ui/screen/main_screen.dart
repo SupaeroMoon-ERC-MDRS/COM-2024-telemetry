@@ -54,52 +54,7 @@ class MainScreen extends StatelessWidget {
                               color: Colors.red
                             )
                           ),*/
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              IconButton(
-                                onPressed: (){
-                                  Replay.speed = (Replay.speed / 2).clamp(0.25, 16.0);
-                                },
-                                iconSize: ThemeManager.globalStyle.subTitleFontSize + 6,
-                                padding: EdgeInsets.zero,
-                                splashColor: Colors.grey,
-                                icon: const Icon(Icons.fast_rewind)
-                              ),
-                              IconButton(
-                                onPressed: (){
-                                  if (Replay.wasStopped != true) {
-                                    Replay.pause();
-                                  }
-                                },
-                                iconSize: ThemeManager.globalStyle.subTitleFontSize + 6,
-                                padding: EdgeInsets.zero,
-                                splashColor: Colors.grey,
-                                icon: const Icon(Icons.pause)
-                              ),
-                              IconButton(
-                                onPressed: (){
-                                  Replay.speed = 1.0;
-                                  if (Replay.wasStopped == true) {
-                                    Replay.resume();
-                                  }
-                                },
-                                iconSize: ThemeManager.globalStyle.subTitleFontSize + 6,
-                                padding: EdgeInsets.zero,
-                                splashColor: Colors.grey,
-                                icon: const Icon(Icons.play_arrow)
-                              ),
-                              IconButton(
-                                onPressed: (){
-                                  Replay.speed = (Replay.speed * 2).clamp(0.25, 16.0);
-                                },
-                                iconSize: ThemeManager.globalStyle.subTitleFontSize + 6,
-                                padding: EdgeInsets.zero,
-                                splashColor: Colors.grey,
-                                icon: const Icon(Icons.fast_forward)
-                              ),
-                            ],
-                          ),
+                          const ReplayControls(),
                         ],
                       ),
                     ),
@@ -220,4 +175,129 @@ class _DataloggerControlState extends State<DataloggerControl> {
       icon: Icon(Datalogger.isRunning ? Icons.close : Icons.receipt)
     );
   }
+}
+
+class ReplayControls extends StatefulWidget {
+  const ReplayControls({super.key});
+
+  @override
+  State<ReplayControls> createState() => _ReplayControlsState();
+}
+
+class _ReplayControlsState extends State<ReplayControls> with SingleTickerProviderStateMixin {
+  late final AnimationController _playPauseController;
+  void _update() => setState(() {});
+
+  @override
+  void initState() {
+    super.initState();
+    _playPauseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+      value: (Replay.wasStopped == true) ? 0.0 : 1.0, // 0.0 => play icon, 1.0 => pause icon
+    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    // Keep icon in sync if external logic changed the state before rebuild
+    _playPauseController.value = (Replay.wasStopped == true) ? 0.0 : 1.0;
+    super.didChangeDependencies();
+  }
+
+  @override
+  void dispose() {
+    _playPauseController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        IconButton(
+          onPressed: () {
+            final bool isPaused = (Replay.wasStopped == true);
+            if (isPaused) {
+              // Resume without altering the current speed
+              Replay.resume();
+              _playPauseController.forward(); // morph to pause
+            } else {
+              // Pause
+              Replay.pause();
+              _playPauseController.reverse(); // morph to play
+            }
+            _update();
+          },
+          iconSize: ThemeManager.globalStyle.subTitleFontSize + 6,
+          padding: EdgeInsets.zero,
+          splashColor: Colors.grey,
+          icon: AnimatedIcon(
+            icon: AnimatedIcons.play_pause,
+            progress: _playPauseController,
+          ),
+          tooltip: (Replay.wasStopped == true) ? "Play" : "Pause",
+        ),
+        IconButton(
+          onPressed: () {
+            Replay.speed = (Replay.speed / 2).clamp(0.25, 16.0);
+            _update();
+          },
+          iconSize: ThemeManager.globalStyle.subTitleFontSize + 6,
+          padding: EdgeInsets.zero,
+          splashColor: Colors.grey,
+          icon: const Icon(Icons.slow_motion_video),
+          tooltip: "Slow down",
+        ),
+        IconButton(
+          onPressed: () {
+            Replay.speed = (Replay.speed * 2).clamp(0.25, 16.0);
+            _update();
+          },
+          iconSize: ThemeManager.globalStyle.subTitleFontSize + 6,
+          padding: EdgeInsets.zero,
+          splashColor: Colors.grey,
+          icon: const Icon(Icons.fast_forward),
+        ),
+                // Dynamic speed label showing current replay speed.
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: Replay.speed == 1.0
+                ? ThemeManager.globalStyle.secondaryColor.withOpacity(0.4)
+                : (Replay.speed > 1.0
+                    ? Colors.green.withOpacity(0.3)
+                    : Colors.orange.withOpacity(0.3)),
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(
+              color: Replay.speed == 1.0
+                  ? ThemeManager.globalStyle.primaryColor.withOpacity(0.4)
+                  : (Replay.speed > 1.0 ? Colors.green : Colors.orange),
+              width: 1,
+            ),
+          ),
+          child: Text(
+            _formatSpeed(Replay.speed),
+            style: ThemeManager.subTitleStyle.copyWith(
+              fontSize: ThemeManager.globalStyle.subTitleFontSize - 2,
+              color: Replay.speed == 1.0
+                  ? ThemeManager.globalStyle.primaryColor
+                  : (Replay.speed > 1.0 ? Colors.green.shade800 : Colors.orange.shade800),
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+String _formatSpeed(double speed) {
+  // Display nicer formatting: 1x, 1.50x, 0.25x etc. Strip trailing zeros except keep one decimal if needed.
+  if (speed == 1.0) return "1x";
+  String s = speed.toStringAsFixed(2);
+  // Remove trailing zeros at end and any dangling decimal point
+  s = s.replaceAll(RegExp(r"0+$"), "").replaceAll(RegExp(r"\.$"), "");
+  return "${s}x";
 }

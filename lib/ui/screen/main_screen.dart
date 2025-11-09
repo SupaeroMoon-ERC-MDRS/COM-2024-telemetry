@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
 import 'package:supaeromoon_ground_station/data_misc/datalogger.dart';
@@ -48,12 +49,7 @@ class MainScreen extends StatelessWidget {
                       child: Column(
                         children: [
                           Expanded(child: TabTree(controller: _tabTreeController)),
-                          /*SizedBox(
-                            height: 100,
-                            child: Container(
-                              color: Colors.red
-                            )
-                          ),*/
+                          const ReplayBar(),
                           const ReplayControls(),
                         ],
                       ),
@@ -220,7 +216,6 @@ class _ReplayControlsState extends State<ReplayControls> with SingleTickerProvid
           onPressed: () {
             final bool isPaused = (Replay.wasStopped == true);
             if (isPaused) {
-              // Resume without altering the current speed
               Replay.resume();
               _playPauseController.forward(); // morph to pause
             } else {
@@ -259,8 +254,20 @@ class _ReplayControlsState extends State<ReplayControls> with SingleTickerProvid
           padding: EdgeInsets.zero,
           splashColor: Colors.grey,
           icon: const Icon(Icons.fast_forward),
+          tooltip: "Speed up"
         ),
-                // Dynamic speed label showing current replay speed.
+        IconButton(
+          onPressed: () {
+            // Restart replay from the beginning, keep current speed
+            Replay.restart();
+          },
+          iconSize: ThemeManager.globalStyle.subTitleFontSize + 6,
+          padding: EdgeInsets.zero,
+          splashColor: Colors.grey,
+          icon: const Icon(Icons.restart_alt),
+          tooltip: "Restart"
+        ),
+        // Dynamic speed label showing current replay speed.
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
@@ -300,4 +307,120 @@ String _formatSpeed(double speed) {
   // Remove trailing zeros at end and any dangling decimal point
   s = s.replaceAll(RegExp(r"0+$"), "").replaceAll(RegExp(r"\.$"), "");
   return "${s}x";
+}
+
+class ReplayBar extends StatefulWidget {
+  const ReplayBar({super.key});
+
+  @override
+  State<ReplayBar> createState() => _ReplayBarState();
+}
+
+class _ReplayBarState extends State<ReplayBar> {
+  Timer? _tick;
+  double? _dragValue;
+
+  @override
+  void initState() {
+    super.initState();
+    _tick = Timer.periodic(const Duration(milliseconds: 250), (_) {
+      if (!mounted) return;
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _tick?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final int? minTs = Replay.startTime;
+    final int? maxTs = Replay.endTime;
+    final int? curTs = Replay.replayTime;
+
+    if (minTs == null || maxTs == null || maxTs <= minTs) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.timeline, color: ThemeManager.globalStyle.primaryColor),
+            const SizedBox(width: 8),
+            Text(
+              'Replay not loaded',
+              style: ThemeManager.subTitleStyle.copyWith(
+                color: ThemeManager.globalStyle.primaryColor,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final double min = minTs.toDouble();
+    final double max = maxTs.toDouble();
+    final double value = (_dragValue ?? curTs?.toDouble() ?? min).clamp(min, max);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        children: [
+          Text(_formatClock((value - min).toInt()),
+              style: ThemeManager.subTitleStyle.copyWith(
+                fontSize: ThemeManager.globalStyle.subTitleFontSize - 4,
+                color: ThemeManager.globalStyle.primaryColor,
+              )),
+          const SizedBox(width: 8),
+          Expanded(
+            child: SliderTheme(
+              data: SliderTheme.of(context).copyWith(
+                activeTrackColor: ThemeManager.globalStyle.primaryColor,
+                inactiveTrackColor: ThemeManager.globalStyle.secondaryColor,
+                thumbColor: ThemeManager.globalStyle.primaryColor,
+                overlayColor: ThemeManager.globalStyle.primaryColor,
+              ),
+              child: Slider(
+                min: min,
+                max: max,
+                value: value,
+                onChanged: (double v) {
+                  setState(() => _dragValue = v);
+                },
+                onChangeEnd: (double v) {
+                  setState(() => _dragValue = null);
+                  if (Replay.isActive) {
+                    Replay.seek(v.toInt());
+                  }
+                },
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(_formatClock((max - min).toInt()),
+              style: ThemeManager.subTitleStyle.copyWith(
+                fontSize: ThemeManager.globalStyle.subTitleFontSize - 4,
+                color: ThemeManager.globalStyle.primaryColor,
+              )),
+        ],
+      ),
+    );
+  }
+}
+
+String _formatClock(int millis) {
+  // Format milliseconds offset as mm:ss.mmm or hh:mm:ss if long
+  final int totalSeconds = millis ~/ 1000;
+  final int hours = totalSeconds ~/ 3600;
+  final int minutes = (totalSeconds % 3600) ~/ 60;
+  final int seconds = totalSeconds % 60;
+
+  String two(int n) => n.toString().padLeft(2, '0');
+
+  if (hours > 0) {
+    return '${two(hours)}:${two(minutes)}:${two(seconds)}';
+  }
+  return '${two(minutes)}:${two(seconds)}';
 }

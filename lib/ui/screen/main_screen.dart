@@ -46,12 +46,18 @@ class MainScreen extends StatelessWidget {
                   children: [
                     DashMenuSlidingSwitch(controller: _topMenuController, dashController: _dashController,),
                     Expanded(
-                      child: Column(
-                        children: [
-                          Expanded(child: TabTree(controller: _tabTreeController)),
-                          const ReplayBar(),
-                          const ReplayControls(),
-                        ],
+                      child: ValueListenableBuilder<DataSourceMode>(
+                        valueListenable: DataSource.modeNotifier,
+                        builder: (context, mode, _) {
+                          final bool showReplay = mode == DataSourceMode.replay;
+                          return Column(
+                            children: [
+                              Expanded(child: TabTree(controller: _tabTreeController)),
+                              if (showReplay) const ReplayBar(),
+                              if (showReplay) const ReplayControls(),
+                            ],
+                          );
+                        },
                       ),
                     ),
                   ],
@@ -349,12 +355,6 @@ class _ReplayBarState extends State<ReplayBar> {
           children: [
             Icon(Icons.timeline, color: ThemeManager.globalStyle.primaryColor),
             const SizedBox(width: 8),
-            Text(
-              'Replay not loaded',
-              style: ThemeManager.subTitleStyle.copyWith(
-                color: ThemeManager.globalStyle.primaryColor,
-              ),
-            ),
           ],
         ),
       );

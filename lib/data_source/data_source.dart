@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:supaeromoon_ground_station/data_source/net.dart';
 import 'package:supaeromoon_ground_station/data_source/replay.dart';
 import 'package:supaeromoon_ground_station/data_source/selftest.dart';
@@ -12,6 +13,8 @@ enum DataSourceMode{
 
 abstract class DataSource{
   static DataSourceMode _mode = DataSourceMode.none;
+  // Notifier to allow UI widgets to rebuild reactively when the mode changes.
+  static final ValueNotifier<DataSourceMode> modeNotifier = ValueNotifier<DataSourceMode>(_mode);
 
   static int now(){
     if(_mode == DataSourceMode.replay){
@@ -35,6 +38,7 @@ abstract class DataSource{
 
     Net.start();
     _mode = DataSourceMode.net;
+    modeNotifier.value = _mode;
   }
 
   static void replay(){
@@ -52,6 +56,7 @@ abstract class DataSource{
 
     Replay.start();
     _mode = DataSourceMode.replay;
+    modeNotifier.value = _mode;
   }
 
   static void selftest(){
@@ -69,6 +74,7 @@ abstract class DataSource{
 
     Selftest.start();
     _mode = DataSourceMode.selftest;
+    modeNotifier.value = _mode;
   }
 
   static void stop(){
@@ -85,9 +91,11 @@ abstract class DataSource{
     DataStorage.clear();
 
     _mode = DataSourceMode.none;
+    modeNotifier.value = _mode;
   }
 
   static bool get isActive => _mode != DataSourceMode.none;
 
   static bool isMode(final DataSourceMode mode) => mode == _mode;
+  static DataSourceMode get mode => _mode;
 }

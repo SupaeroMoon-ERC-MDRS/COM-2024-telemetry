@@ -265,14 +265,14 @@ class _ReplayControlsState extends State<ReplayControls> with SingleTickerProvid
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
             color: Replay.speed == 1.0
-                ? ThemeManager.globalStyle.secondaryColor.withOpacity(0.4)
+                ? ThemeManager.globalStyle.secondaryColor
                 : (Replay.speed > 1.0
-                    ? Colors.green.withOpacity(0.3)
-                    : Colors.orange.withOpacity(0.3)),
+                    ? Colors.green
+                    : Colors.orange),
             borderRadius: BorderRadius.circular(6),
             border: Border.all(
               color: Replay.speed == 1.0
-                  ? ThemeManager.globalStyle.primaryColor.withOpacity(0.4)
+                  ? ThemeManager.globalStyle.primaryColor
                   : (Replay.speed > 1.0 ? Colors.green : Colors.orange),
               width: 1,
             ),

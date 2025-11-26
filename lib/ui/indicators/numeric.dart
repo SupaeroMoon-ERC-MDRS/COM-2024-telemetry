@@ -30,7 +30,8 @@ class _NumericIndicatorState extends State<NumericIndicator> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return Container(
+      height: 35,
       padding: EdgeInsets.all(ThemeManager.globalStyle.padding),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,

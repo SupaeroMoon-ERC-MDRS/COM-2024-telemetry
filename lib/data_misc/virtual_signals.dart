@@ -100,7 +100,7 @@ class VirtualSignal{
   void _tick(){
     try{
       final num value = Evaluator.eval<num>(exec);
-      DataStorage.update(name, value, DataSource.now());
+      DataStorage.update(name, value.toDouble(), DataSource.now());
     }catch(ex){
       return;
     }
@@ -153,8 +153,9 @@ abstract class VirtualSignalController{
     }
   }
 
-  static void add(final VirtualSignal alarm){
-    _virtualSignals.add(alarm..register(_virtualSignals));
+  static void add(final VirtualSignal vsig){
+    DataStorage.storage[vsig.name] = SignalContainer<Float32List>.create(vsig.name, vsig.name, ""); // TODO unit calculation
+    _virtualSignals.add(vsig..register(_virtualSignals));
   }
 
   static List<VirtualSignal> get virtualSignalsView => List.of(_virtualSignals);
@@ -163,7 +164,7 @@ abstract class VirtualSignalController{
     Text("${_virtualSignals[index].name} : ${_virtualSignals[index].expr}", style: ThemeManager.textStyle, maxLines: 1, overflow: TextOverflow.clip,);
 
   static void remove(final int index){
-    _virtualSignals.removeAt(index).deregister();
+    DataStorage.storage.removeWhere((key, value) => key == (_virtualSignals.removeAt(index)..deregister()).name); // im sorry
   }
 
   static void save(){

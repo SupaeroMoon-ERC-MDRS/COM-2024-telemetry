@@ -5,9 +5,7 @@ import 'package:supaeromoon_ground_station/ui/theme.dart';
 import 'package:supaeromoon_ground_station/ui/visuals/panel.dart';
 
 abstract class ConfigurableStatefulWidget extends StatefulWidget{
-  const ConfigurableStatefulWidget({super.key, this.config});
-
-  final dynamic config;
+  const ConfigurableStatefulWidget({super.key});
 }
 
 class _AddNewFooter extends StatelessWidget {
@@ -43,9 +41,8 @@ class _EditColsizeHeader extends StatelessWidget {
       size: size,
       child: Row(
         children: [
-          Container(
+          Padding(
             padding: EdgeInsets.all(ThemeManager.globalStyle.padding),
-            decoration: BoxDecoration(border: Border(left: BorderSide(width: 1.0, color: ThemeManager.globalStyle.primaryColor),)),
             child: Text("Column size: ")
           ),
           const Spacer(),
@@ -74,6 +71,8 @@ class _EditColsizeHeader extends StatelessWidget {
 class NumericPanelConfig{
   final List<String?> subscribedSignals = [null];
   int colSize = 1;
+
+  double get width => (subscribedSignals.length / colSize).ceil() * 300;
 }
 
 class NumericPanelConfigurable extends ConfigurableStatefulWidget {
@@ -92,9 +91,9 @@ class _NumericPanelConfigurableState extends State<NumericPanelConfigurable> {
     final int colNum = (widget.config.subscribedSignals.length / widget.config.colSize).ceil();
     return PanelWithHeaderFooter(
       colsize: widget.config.colSize,
-      size: Size(colNum * 300, widget.config.colSize * 50 + 100), // + header footer height
+      size: Size(colNum * 300, widget.config.colSize * 35 + 100), // + header footer height
       header: _EditColsizeHeader(
-        size: Size(300.0 * colNum, 50),
+        size: Size(300.0 * colNum, 35),
         colSize: widget.config.colSize,
         onDone: (final int newValue){
           widget.config.colSize = newValue;
@@ -102,10 +101,11 @@ class _NumericPanelConfigurableState extends State<NumericPanelConfigurable> {
         }
       ),
       footer: _AddNewFooter(
-        size: Size(300.0 * colNum, 50),
+        size: Size(300.0 * colNum, 35),
         onPressed: () {
           widget.config.subscribedSignals.add(null);
           widget.onChange();
+          setState(() {});
         }, 
       ),
       widgets: List.generate(widget.config.subscribedSignals.length, (final int i) => Row(
@@ -118,6 +118,7 @@ class _NumericPanelConfigurableState extends State<NumericPanelConfigurable> {
               if(selected != null){
                 widget.config.subscribedSignals[i] = selected;
                 widget.onChange();
+                setState(() {});
               }
             }
           ),
@@ -126,6 +127,7 @@ class _NumericPanelConfigurableState extends State<NumericPanelConfigurable> {
             onPressed: (){
               widget.config.subscribedSignals.removeAt(i);
               widget.onChange();
+              setState(() {});
             },
             icon: Icon(Icons.delete)
           )

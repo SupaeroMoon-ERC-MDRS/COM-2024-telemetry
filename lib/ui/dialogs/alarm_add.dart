@@ -75,7 +75,9 @@ class _AlarmAddDialogState extends State<AlarmAddDialog> {
                         AlarmController.add(
                           Alarm.fromMap({
                             "name": _name.text,
-                            "expr": _expr.text
+                            "active": 1,
+                            "expr": _expr.text,
+                            "level": AlarmLevel.CAUTION.index
                           })
                         );
                         Navigator.of(context).pop();

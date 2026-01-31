@@ -3,6 +3,7 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  audioplayers_windows
   bitsdojo_window_windows
   screen_retriever_windows
   window_manager

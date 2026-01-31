@@ -1,5 +1,5 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:supaeromoon_ground_station/data_misc/eval/eval.dart';
 import 'package:supaeromoon_ground_station/data_misc/virtual_signals.dart';
 import 'package:supaeromoon_ground_station/data_source/database.dart';
@@ -7,17 +7,18 @@ import 'package:supaeromoon_ground_station/data_storage/data_storage.dart';
 import 'package:supaeromoon_ground_station/io/file_system.dart';
 import 'package:supaeromoon_ground_station/io/logger.dart';
 import 'package:supaeromoon_ground_station/io/serdes.dart';
-import 'package:supaeromoon_ground_station/notifications/notification_logic.dart' as noti;
+import 'package:supaeromoon_ground_station/notifications/notification_logic.dart'
+    as noti;
 import 'package:supaeromoon_ground_station/ui/theme.dart';
 
-enum AlarmLevel{
+enum AlarmLevel {
   // ignore: constant_identifier_names
   CAUTION,
   // ignore: constant_identifier_names
   MASTER,
 }
 
-class Alarm{
+class Alarm {
   final String name;
   final String expr;
   final bool active;
@@ -27,27 +28,25 @@ class Alarm{
   final List<String> inputs = [];
   final List<String> regSignals = [];
 
-  Alarm._({
-    required this.name,
-    required this.active,
-    required this.expr,
-    required this.exec,
-    required this.level
-  }){
+  Alarm._(
+      {required this.name,
+      required this.active,
+      required this.expr,
+      required this.exec,
+      required this.level}) {
     inputs.addAll(Evaluator.requiredSignals(exec));
   }
 
   bool get canTrigger => active & !triggered;
 
-  void _regSignalsCalc(final List<VirtualSignal> virtualSignals){
+  void _regSignalsCalc(final List<VirtualSignal> virtualSignals) {
     final List<String> signalInputs = [];
     final List<String> virtualInputs = [];
 
-    for(final String sig in inputs){
-      if(virtualSignals.any((v) => v.name == sig)){
+    for (final String sig in inputs) {
+      if (virtualSignals.any((v) => v.name == sig)) {
         virtualInputs.add(sig);
-      }
-      else{
+      } else {
         signalInputs.add(sig);
       }
     }
@@ -57,43 +56,44 @@ class Alarm{
     final Set<String> requirement = {};
     final Set<String> dependency = {};
 
-    for(final String signal in signalInputs){
-      signalMessageReq.add(
-        DBCDatabase.messages.entries.firstWhere((message) => 
-          message.value.signals.containsKey(signal)).key
-      );
+    for (final String signal in signalInputs) {
+      signalMessageReq.add(DBCDatabase.messages.entries
+          .firstWhere((message) => message.value.signals.containsKey(signal))
+          .key);
     }
 
-    for(final String signal in virtualInputs){
+    for (final String signal in virtualInputs) {
       requirement.add(signal);
-      final List<String> thisInputs = virtualSignals.firstWhere((v) => v.name == signal).inputs;
-      for(final String dep in thisInputs){
-        if(virtualSignals.any((v) => v.name == dep)){
+      final List<String> thisInputs =
+          virtualSignals.firstWhere((v) => v.name == signal).inputs;
+      for (final String dep in thisInputs) {
+        if (virtualSignals.any((v) => v.name == dep)) {
           dependency.add(dep);
-        }
-        else{
-          virtualDependency.add(
-            DBCDatabase.messages.entries.firstWhere((message) => 
-              message.value.signals.containsKey(signal)).key
-          );
+        } else {
+          virtualDependency.add(DBCDatabase.messages.entries
+              .firstWhere(
+                  (message) => message.value.signals.containsKey(signal))
+              .key);
         }
       }
     }
 
-    final Set<String> req = signalMessageReq.difference(virtualDependency).map((e) => DBCDatabase.messages[e]!.signals.keys.last).toSet();
+    final Set<String> req = signalMessageReq
+        .difference(virtualDependency)
+        .map((e) => DBCDatabase.messages[e]!.signals.keys.last)
+        .toSet();
     final Set<String> virtualReq = requirement.difference(dependency);
     regSignals.clear();
     regSignals.addAll([...req, ...virtualReq]);
   }
-  
-  bool register(final List<VirtualSignal> virtualSignals){
+
+  bool register(final List<VirtualSignal> virtualSignals) {
     _regSignalsCalc(virtualSignals);
 
-    for(final String signal in regSignals){
-      if(DataStorage.storage.containsKey(signal)){
+    for (final String signal in regSignals) {
+      if (DataStorage.storage.containsKey(signal)) {
         DataStorage.storage[signal]!.everyUpdateNotifier.addListener(_check);
-      }
-      else{
+      } else {
         deregister();
         return false;
       }
@@ -101,96 +101,120 @@ class Alarm{
     return true;
   }
 
-  void deregister(){
-    for(final String signal in regSignals){
-      if(DataStorage.storage.containsKey(signal)){
+  void deregister() {
+    for (final String signal in regSignals) {
+      if (DataStorage.storage.containsKey(signal)) {
         DataStorage.storage[signal]!.everyUpdateNotifier.removeListener(_check);
       }
     }
   }
 
-  void _check(){
-    if(canTrigger && inputs.every((final String signal) => DataStorage.storage[signal]!.vt.isNotEmpty) && Evaluator.eval<bool>(exec)){
+  void _check() {
+    if (canTrigger &&
+        inputs.every((final String signal) =>
+            DataStorage.storage[signal]!.vt.isNotEmpty) &&
+        Evaluator.eval<bool>(exec)) {
       triggered = true;
-      if(level == AlarmLevel.CAUTION){
-        noti.NotificationController.add(noti.Notification.decaying(LogEntry.warning("Alarm $name triggered"), 10000));
+      if (level == AlarmLevel.CAUTION) {
+        noti.NotificationController.add(noti.Notification.decaying(
+            LogEntry.warning("Alarm $name triggered"), 10000));
+      } else {
+        noti.NotificationController.add(noti.Notification.persistent(
+            LogEntry.warning("Alarm $name triggered")));
       }
-      else{
-        noti.NotificationController.add(noti.Notification.persistent(LogEntry.warning("Alarm $name triggered")));
-      }
-      /// TODO Temporary
-      SystemSound.play(SystemSoundType.alert);
-
-      /// Instead have a sound "library"
-      /// That is an abstract class, uses saved sound files in local storage
-      /// Has separate sounds for each log level (see [LogLevel enum]) plus two sounds for alarms
-      /// 
-      /// for implementation it should be an abstract class with static methods, be initialized in LifeCycle.preInit()
-      /// find a sound player libary on the pub.dev website that works on both windows and linux
-      /// in initialization you likely need to initialize some sound player library and load the sound files into memory (depends on the sound library you use)
+      SoundLibrary.playAlarm(level);
     }
   }
 
-  Map get asMap => {
-    "name": name,
-    "expr": expr,
-    "active": active,
-    "level": level.index
-  };
+  Map get asMap =>
+      {"name": name, "expr": expr, "active": active, "level": level.index};
 
-  factory Alarm.fromMap(final Map map){
-    return Alarm._(name: map["name"], active: map["active"], expr: map["expr"], exec: Evaluator.compile<bool>(map["expr"]), level: AlarmLevel.values[map["level"]]);
+  factory Alarm.fromMap(final Map map) {
+    return Alarm._(
+        name: map["name"],
+        active: map["active"] ==  0? false:true ,
+        expr: map["expr"],
+        exec: Evaluator.compile<bool>(map["expr"]),
+        level: AlarmLevel.values[map["level"]]);
   }
 }
 
-abstract class AlarmController{
+abstract class AlarmController {
   static final List<Alarm> _alarms = [];
 
   static List<Alarm> get alarms => _alarms;
 
   static int getLen() => _alarms.length;
 
-  static void load(){
+  static void load() {
     final List<Map> ser;
-    try{
+    try {
       ser = SerDes.jsonFromBytes(
-        FileSystem.tryLoadBytesFromLocalSync(FileSystem.topDir, "ALARMS")
-      ) as List<Map>;
-    }catch(ex){
+              FileSystem.tryLoadBytesFromLocalSync(FileSystem.topDir, "ALARMS"))
+          as List<Map>;
+    } catch (ex) {
       localLogger.error("Failed to load alarms: ${ex.toString()}");
       return;
     }
 
-    _alarms.addAll(ser.map((e){
-      try{
+    _alarms.addAll(ser.map((e) {
+      try {
         return Alarm.fromMap(e);
-      }catch(ex){
+      } catch (ex) {
         localLogger.error("Failed to parse alarm: ${ex.toString()}");
-        return Alarm._(name: "NOSIG", expr: "", active: false, exec: ExecTree.empty(), level: AlarmLevel.CAUTION);
+        return Alarm._(
+            name: "NOSIG",
+            expr: "",
+            active: false,
+            exec: ExecTree.empty(),
+            level: AlarmLevel.CAUTION);
       }
     }));
     _alarms.removeWhere((alarm) => alarm.name == "NOSIG");
 
-    for(final Alarm alarm in _alarms){
+    for (final Alarm alarm in _alarms) {
       alarm.register(VirtualSignalController.virtualSignalsView);
     }
   }
 
-  static void add(final Alarm alarm){
+  static void add(final Alarm alarm) {
     _alarms.add(alarm..register(VirtualSignalController.virtualSignalsView));
   }
 
-  static Widget getWidget(final int index) => 
-    Text("${_alarms[index].name} : ${_alarms[index].expr}", style: ThemeManager.textStyle, maxLines: 1, overflow: TextOverflow.clip,);
+  static Widget getWidget(final int index) => Text(
+        "${_alarms[index].name} : ${_alarms[index].expr}",
+        style: ThemeManager.textStyle,
+        maxLines: 1,
+        overflow: TextOverflow.clip,
+      );
 
-
-  static void remove(final int index){
+  static void remove(final int index) {
     _alarms.removeAt(index).deregister();
   }
 
-  static void save(){
-    FileSystem.trySaveBytesToLocalAsync(FileSystem.topDir, "ALARMS", 
-      SerDes.jsonToBytes(_alarms.map((e) => e.asMap).toList())
-    );
+  static void save() {
+    FileSystem.trySaveBytesToLocalAsync(FileSystem.topDir, "ALARMS",
+        SerDes.jsonToBytes(_alarms.map((e) => e.asMap).toList()));
   }
+}
+
+abstract class SoundLibrary {
+  static final Map<LogLevel, AudioPlayer> _logPlayers = {};
+  static final Map<AlarmLevel, AudioPlayer> _alarmPlayers = {};
+
+  static Future<void> init() async {
+    for (final level in LogLevel.values) {
+      _logPlayers[level] = AudioPlayer()
+        ..setSource(
+            AssetSource('sound_library/log_${level.name.toLowerCase()}.wav'));
+    }
+    for (final level in AlarmLevel.values) {
+      _alarmPlayers[level] = AudioPlayer()
+        ..setSource(
+            AssetSource('sound_library/alarm_${level.name.toLowerCase()}.wav'));
+    }
+  }
+
+  static void playLog(LogLevel level) => _logPlayers[level]?.resume();
+  static void playAlarm(AlarmLevel level) => _alarmPlayers[level]?.resume();
 }

@@ -15,7 +15,7 @@ import 'package:supaeromoon_ground_station/io/localization.dart';
 import 'package:supaeromoon_ground_station/io/logger.dart';
 import 'package:window_manager/window_manager.dart';
 
-abstract class LifeCycle{
+abstract class LifeCycle {
   static Future<void> preInit() async {
     WidgetsFlutterBinding.ensureInitialized();
     await windowManager.ensureInitialized();
@@ -26,44 +26,43 @@ abstract class LifeCycle{
     Loc.load();
     Loc.setLanguage("en-EN");
     await UnitSystem.loadFromDisk();
-    for(final String path in Session.dbcPaths){
-      if(DBCDatabase.parse(path)){
+    for (final String path in Session.dbcPaths) {
+      if (DBCDatabase.parse(path)) {
         localLogger.info("Successfully loaded dbc at $path");
-      }
-      else{
+      } else {
         localLogger.warning("Error when loading dbc at $path");
       }
     }
     DataStorage.setup();
+    await SoundLibrary.init();
     VirtualSignalController.load();
     AlarmController.load();
   }
 
-  static void postInit(WindowListener root){
+  static void postInit(WindowListener root) {
     appWindow.maximizeOrRestore();
     windowManager.addListener(root);
     windowManager.setPreventClose(true);
-    if(NetCode.loadDLL()){
+    if (NetCode.loadDLL()) {
       DataSource.selftest();
-    }
-    else{
+    } else {
       DataSource.selftest();
-      localLogger.critical("Netcode loading failed, Network mode is unavailable", doNoti: true);
+      localLogger.critical(
+          "Netcode loading failed, Network mode is unavailable",
+          doNoti: true);
     }
   }
 
   static Future<void> shutdown() async {
     Session.save();
-    try{
+    try {
       DataSource.stop();
       VirtualSignalController.save();
       AlarmController.save();
 
-    // ignore: empty_catches
-    }catch(ex){
-      
-    }
-    
+      // ignore: empty_catches
+    } catch (ex) {}
+
     await localLogger.stop();
     exit(0);
   }

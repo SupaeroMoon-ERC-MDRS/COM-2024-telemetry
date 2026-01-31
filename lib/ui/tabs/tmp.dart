@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:supaeromoon_ground_station/ui/indicator_panels/numeric_panel.dart';
 
 import '../indicators/indicators.dart';
 
@@ -126,6 +127,56 @@ const List<Widget> electricalTab = [
           title: "Voltages2",
           min: 0,
           max: 5
+        ),
+      ),
+    ],
+  ),
+];
+
+const List<Widget> navigationTab = [
+  Row(
+    children: [
+      NumericPanel(subscribedSignals: ["joint_0","joint_1","joint_2","joint_3",], colSize: 4),
+      NumericPanel(subscribedSignals: ["odometry","motor_fl_target","motor_fr_target","motor_ml_target","motor_mr_target","motor_rl_target","motor_rr_target",], colSize: 4),
+      BooleanIndicator(subscribedSignal: "arm_active")
+    ],
+  ),
+  Row(
+    children: [
+      Flexible(
+        child: TimeSeriesChart(
+          subscribedSignals: ["joint_0","joint_1","joint_2","joint_3",],
+          title: "Arm angles",
+          min: 0,
+          max: 360
+        ),
+      ),
+      Flexible(
+        child: TimeSeriesChart(
+          subscribedSignals: ["odometry"],
+          title: "Odometry",
+          min: 0,
+          max: 100
+        ),
+      ),
+    ],
+  ),
+  Row(
+    children: [
+      Flexible(
+        child: TimeSeriesChart(
+          subscribedSignals: ["motor_fl_target", "motor_ml_target", "motor_rl_target"],
+          title: "Motors left",
+          min: -20000,
+          max: 20000
+        ),
+      ),
+      Flexible(
+        child: TimeSeriesChart(
+          subscribedSignals: ["motor_fr_target", "motor_mr_target", "motor_rr_target"],
+          title: "Motors right",
+          min: -20000,
+          max: 20000
         ),
       ),
     ],

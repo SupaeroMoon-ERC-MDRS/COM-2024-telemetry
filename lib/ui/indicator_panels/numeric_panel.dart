@@ -14,7 +14,7 @@ class NumericPanel extends StatelessWidget {
     final int colNum = (subscribedSignals.length / colSize.toDouble()).ceil();
     return Panel(
       colsize: colSize,
-      size: Size(colNum * 300, colSize * 35 + 2 * ThemeManager.globalStyle.padding),
+      size: Size(colNum * 350, colSize * 35 + 2 * ThemeManager.globalStyle.padding),
       widgets: List.generate(subscribedSignals.length, (final int i) => NumericIndicator(subscribedSignal: subscribedSignals[i])),
     );
   }

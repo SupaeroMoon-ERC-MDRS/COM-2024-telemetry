@@ -18,6 +18,7 @@ class TabTreeController{
     TabEntry(name: "Settings", icon: Icons.settings, tree: settingsTab),
     const TabEntry(name: "Remote Control", icon: Icons.control_camera, tree: remoteControlTab),
     const TabEntry(name: "Electrical", icon: Icons.electric_bolt, tree: electricalTab),
+    const TabEntry(name: "Navigation", icon: Icons.navigation, tree: navigationTab),
     TabEntry(name: "Custom", icon: Icons.dashboard_customize, tree: [CustomTabContainer(controller: CustomTabController(),)]),
   ];
   final BlankNotifier notifier = BlankNotifier(null);

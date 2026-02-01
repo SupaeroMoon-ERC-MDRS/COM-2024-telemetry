@@ -138,7 +138,16 @@ const List<Widget> navigationTab = [
     children: [
       NumericPanel(subscribedSignals: ["joint_0","joint_1","joint_2","joint_3",], colSize: 4),
       NumericPanel(subscribedSignals: ["odometry","motor_fl_target","motor_fr_target","motor_ml_target","motor_mr_target","motor_rl_target","motor_rr_target",], colSize: 4),
-      BooleanIndicator(subscribedSignal: "arm_active")
+      SizedBox(
+        width: 300,
+        child: Column(
+          children: [
+            BooleanIndicator(subscribedSignal: "arm_active"),
+            BooleanIndicator(subscribedSignal: "scale_valid"),
+            NumericIndicator(subscribedSignal: "scale_meas"),
+          ],
+        ),
+      ),
     ],
   ),
   Row(
